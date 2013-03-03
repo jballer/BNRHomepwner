@@ -19,5 +19,6 @@
 - (NSArray *)allItems;
 - (BNRItem *)createItem;
 - (void)removeItem:(BNRItem *)p;
+- (void)moveItemFrom:(int)index to:(int)newIndex;
 
 @end

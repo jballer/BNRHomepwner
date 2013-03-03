@@ -52,4 +52,11 @@
     [allItems removeObjectIdenticalTo:p]; // This goes by pointer instead of isEqual.
 }
 
+- (void)moveItemFrom:(int)index to:(int)newIndex
+{
+    BNRItem *item = [allItems objectAtIndex:index];
+    [allItems removeObjectAtIndex:index];
+    [allItems insertObject:item atIndex:newIndex];
+}
+
 @end

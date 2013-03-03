@@ -59,54 +59,71 @@
 //    [[(UIButton *)sender titleLabel] setText:(wasEditing ? @"Edit" : @"Done")];
 }
 
+// Delegate stuff
+// BRONZE CHALLENGE
+- (NSString *)                          tableView:(UITableView *)tableView
+titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return @"Remove";
+}
+
 
 // Data Source stuff
-    // The following two methods are required to implement a Header View
-        - (UIView *)tableView:(UITableView *)tableView
-       viewForHeaderInSection:(NSInteger)section
-        {
-            return [self headerView];
-        }
+// The following two methods are required to implement a Header View
+- (UIView *)tableView:(UITableView *)tableView
+viewForHeaderInSection:(NSInteger)section
+{
+    return [self headerView];
+}
 
-        - (CGFloat)tableView:(UITableView *)tableView
-    heightForHeaderInSection:(NSInteger)section
-        {
-            return [[self headerView] bounds].size.height;
-        }
+- (CGFloat)tableView:(UITableView *)tableView
+heightForHeaderInSection:(NSInteger)section
+{
+    return [[self headerView] bounds].size.height;
+}
 
-    - (NSInteger)tableView:(UITableView *)tableView
-     numberOfRowsInSection:(NSInteger)section
-    {
-        return [[[BNRItemStore sharedStore] allItems] count];
+- (NSInteger)tableView:(UITableView *)tableView
+ numberOfRowsInSection:(NSInteger)section
+{
+    return [[[BNRItemStore sharedStore] allItems] count];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
     }
+    
+    BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+    
+    [[cell textLabel] setText:[currentItem description]];
+//    [cell setShowsReorderControl:YES];
+    
+    return cell;
+}
 
-
-    - (UITableViewCell *)tableView:(UITableView *)tableView
-             cellForRowAtIndexPath:(NSIndexPath *)indexPath
+// Delete object when deleted by user in Edit mode
+- (void)tableView:(UITableView *)tableView
+commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
+forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle == UITableViewCellEditingStyleDelete)
     {
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
-        if (!cell) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
-        }
-        
         BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-        
-        [[cell textLabel] setText:[currentItem description]];
-        
-        return cell;
+        [[BNRItemStore sharedStore] removeItem:currentItem];
+        [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
     }
+}
 
-    // Delete object when deleted by user in Edit mode
-    - (void)    tableView:(UITableView *)tableView
-       commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
-        forRowAtIndexPath:(NSIndexPath *)indexPath
-    {
-        if (editingStyle == UITableViewCellEditingStyleDelete)
-        {
-            BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-            [[BNRItemStore sharedStore] removeItem:currentItem];
-            [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-        }
-    }
+// Move object when user reorders
+- (void)tableView:(UITableView *)tableView
+moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath
+      toIndexPath:(NSIndexPath *)destinationIndexPath
+{
+    [[BNRItemStore sharedStore] moveItemFrom:[sourceIndexPath row] to:[destinationIndexPath row]];
+}
 
 @end
