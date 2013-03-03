@@ -67,6 +67,34 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
     return @"Remove";
 }
 
+// SILVER CHALLENGE
+- (BOOL) tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    BOOL canEdit = true;
+    if ([indexPath row] == ([[self tableView] numberOfRowsInSection:[indexPath section]] - 1))
+    {
+        canEdit = false;
+    }
+    
+    return canEdit;
+}
+
+// GOLD CHALLENGE
+- (NSIndexPath *)               tableView:(UITableView *)tableView
+ targetIndexPathForMoveFromRowAtIndexPath:(NSIndexPath *)sourceIndexPath
+                      toProposedIndexPath:(NSIndexPath *)proposedDestinationIndexPath
+{
+    int maxRow = [[self tableView] numberOfRowsInSection:[proposedDestinationIndexPath section]] - 2;
+    if (([proposedDestinationIndexPath row] >= maxRow))
+    {
+        // This means it went past the static row. Cap it at the second-to-last row.
+        proposedDestinationIndexPath = [NSIndexPath indexPathForRow:maxRow
+                                                          inSection:[proposedDestinationIndexPath section]];
+        NSLog(@"dragged too far");
+    }
+    return proposedDestinationIndexPath;
+}
+
 
 // Data Source stuff
 // The following two methods are required to implement a Header View
@@ -85,22 +113,34 @@ heightForHeaderInSection:(NSInteger)section
 - (NSInteger)tableView:(UITableView *)tableView
  numberOfRowsInSection:(NSInteger)section
 {
-    return [[[BNRItemStore sharedStore] allItems] count];
+    return [[[BNRItemStore sharedStore] allItems] count] + 1;
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // Dequeue a cell
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
     }
     
-    BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-    
-    [[cell textLabel] setText:[currentItem description]];
-//    [cell setShowsReorderControl:YES];
+    // The last item in the list is static
+    if ([indexPath row] == ([[self tableView] numberOfRowsInSection:[indexPath section]] - 1))
+    {
+        // Last item (static)
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
+        [[cell textLabel] setText:@"No more items!"];
+    }
+
+    // The rest of the items come from the BNRItemStore
+    else
+    {
+        
+        BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+        [[cell textLabel] setText:[currentItem description]];
+    }
     
     return cell;
 }
@@ -110,7 +150,11 @@ heightForHeaderInSection:(NSInteger)section
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (editingStyle == UITableViewCellEditingStyleDelete)
+    if ([indexPath row] >= [[self tableView] numberOfRowsInSection:[indexPath section]] - 1){
+        return;
+    }
+                            
+    else if (editingStyle == UITableViewCellEditingStyleDelete)
     {
         BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
         [[BNRItemStore sharedStore] removeItem:currentItem];
