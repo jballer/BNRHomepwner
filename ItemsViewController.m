@@ -48,10 +48,7 @@
                                            inSection:0];
     
     [[self tableView] insertRowsAtIndexPaths:[NSArray arrayWithObject:path]
-                            withRowAnimation:UITableViewRowAnimationTop];
-    
-
-//    [[self tableView] reloadData];
+                            withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 
 - (IBAction)toggleEditingMode:(id)sender
@@ -62,34 +59,54 @@
 //    [[(UIButton *)sender titleLabel] setText:(wasEditing ? @"Edit" : @"Done")];
 }
 
-// The following two methods are required to implement a Header View
-    - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+
+// Data Source stuff
+    // The following two methods are required to implement a Header View
+        - (UIView *)tableView:(UITableView *)tableView
+       viewForHeaderInSection:(NSInteger)section
+        {
+            return [self headerView];
+        }
+
+        - (CGFloat)tableView:(UITableView *)tableView
+    heightForHeaderInSection:(NSInteger)section
+        {
+            return [[self headerView] bounds].size.height;
+        }
+
+    - (NSInteger)tableView:(UITableView *)tableView
+     numberOfRowsInSection:(NSInteger)section
     {
-        return [self headerView];
+        return [[[BNRItemStore sharedStore] allItems] count];
     }
 
-    - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+
+    - (UITableViewCell *)tableView:(UITableView *)tableView
+             cellForRowAtIndexPath:(NSIndexPath *)indexPath
     {
-        return [[self headerView] bounds].size.height;
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
+        }
+        
+        BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+        
+        [[cell textLabel] setText:[currentItem description]];
+        
+        return cell;
     }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return [[[BNRItemStore sharedStore] allItems] count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
-    if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
+    // Delete object when deleted by user in Edit mode
+    - (void)    tableView:(UITableView *)tableView
+       commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
+        forRowAtIndexPath:(NSIndexPath *)indexPath
+    {
+        if (editingStyle == UITableViewCellEditingStyleDelete)
+        {
+            BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+            [[BNRItemStore sharedStore] removeItem:currentItem];
+            [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
     }
-    
-    BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-    
-    [[cell textLabel] setText:[currentItem description]];
-    
-    return cell;
-}
 
 @end
