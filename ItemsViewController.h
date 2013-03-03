@@ -9,5 +9,12 @@
 #import <Foundation/Foundation.h>
 
 @interface ItemsViewController : UITableViewController
+{
+    IBOutlet UIView *headerView; // This is a strong reference because it's a top-level object in the XIB
+}
+
+- (UIView *)headerView;
+- (IBAction)addNewItem:(id)sender;
+- (IBAction)toggleEditingMode:(id)sender;
 
 @end

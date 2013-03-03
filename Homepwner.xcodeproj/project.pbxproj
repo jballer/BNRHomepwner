@@ -19,6 +19,7 @@
 		50A1D1B016E2E1070006201A /* ItemsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1AF16E2E1070006201A /* ItemsViewController.m */; };
 		50A1D1B516E2E2F20006201A /* BNRItemStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1B416E2E2F20006201A /* BNRItemStore.m */; };
 		50A1D1B616E2EB5D0006201A /* BNRItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1B216E2E2DC0006201A /* BNRItem.m */; };
+		50A1D1B816E31E6D0006201A /* HeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 50A1D1B716E31E6D0006201A /* HeaderView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 		50A1D1B216E2E2DC0006201A /* BNRItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BNRItem.m; sourceTree = "<group>"; };
 		50A1D1B316E2E2F20006201A /* BNRItemStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BNRItemStore.h; path = Homepwner/BNRItemStore.h; sourceTree = "<group>"; };
 		50A1D1B416E2E2F20006201A /* BNRItemStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BNRItemStore.m; path = Homepwner/BNRItemStore.m; sourceTree = "<group>"; };
+		50A1D1B716E31E6D0006201A /* HeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HeaderView.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				50A1D1B216E2E2DC0006201A /* BNRItem.m */,
 				50A1D1AE16E2E1070006201A /* ItemsViewController.h */,
 				50A1D1AF16E2E1070006201A /* ItemsViewController.m */,
+				50A1D1B716E31E6D0006201A /* HeaderView.xib */,
 				50A1D19416E2E0C10006201A /* Homepwner */,
 				50A1D18D16E2E0C10006201A /* Frameworks */,
 				50A1D18C16E2E0C10006201A /* Products */,
@@ -170,6 +173,7 @@
 				50A1D1A116E2E0C10006201A /* Default.png in Resources */,
 				50A1D1A316E2E0C10006201A /* Default@2x.png in Resources */,
 				50A1D1A516E2E0C10006201A /* Default-568h@2x.png in Resources */,
+				50A1D1B816E31E6D0006201A /* HeaderView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

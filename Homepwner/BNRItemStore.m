@@ -47,4 +47,9 @@
     return newItem;
 }
 
+- (void)removeItem:(BNRItem *)p
+{
+    [allItems removeObjectIdenticalTo:p]; // This goes by pointer instead of isEqual.
+}
+
 @end
