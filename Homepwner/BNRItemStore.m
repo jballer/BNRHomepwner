@@ -19,4 +19,9 @@
     return sharedStore;
 }
 
++ (id)allocWithZone:(NSZone *)zone
+{
+    return [self sharedStore];
+}
+
 @end
