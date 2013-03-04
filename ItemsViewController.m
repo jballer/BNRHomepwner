@@ -9,6 +9,7 @@
 #import "ItemsViewController.h"
 #import "BNRItem.h"
 #import "BNRItemStore.h"
+#import "DetailViewController.h"
 
 @implementation ItemsViewController
 
@@ -16,6 +17,11 @@
 {
     self = [super initWithStyle:UITableViewStyleGrouped];
     if (self) {
+        [[self navigationItem] setTitle:@"Homepwner"];
+        [[self navigationItem] setRightBarButtonItem:[[UIBarButtonItem alloc]
+                                                      initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
+                                                      target:self action:@selector(addNewItem:)]];
+        [[self navigationItem] setLeftBarButtonItem:[self editButtonItem]];
     }
     return self;
 }
@@ -59,7 +65,17 @@
 //    [[(UIButton *)sender titleLabel] setText:(wasEditing ? @"Edit" : @"Done")];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    // Load data that was changed by the detail view
+    [[self tableView] reloadData];
+}
+
+// =================
 // Delegate stuff
+// =================
 // BRONZE CHALLENGE
 - (NSString *)                          tableView:(UITableView *)tableView
 titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -95,8 +111,20 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
     return proposedDestinationIndexPath;
 }
 
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([indexPath row] != [[self tableView] numberOfRowsInSection:[indexPath section]] - 1)
+    {
+        DetailViewController *detail = [[DetailViewController alloc] init];
+        [detail setItem:[[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]]];
+        [[self navigationController] pushViewController:detail animated:YES];
+    }
+}
 
+// =================
 // Data Source stuff
+// =================
 // The following two methods are required to implement a Header View
 - (UIView *)tableView:(UITableView *)tableView
 viewForHeaderInSection:(NSInteger)section
