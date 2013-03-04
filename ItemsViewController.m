@@ -31,17 +31,6 @@
     return [self init];
 }
 
-- (UIView *)headerView
-{
-    if (!headerView)
-    {
-        // Load HeaderView.xib
-        [[NSBundle mainBundle] loadNibNamed:@"HeaderView" owner:self options:nil];
-        NSLog(@"Loaded Header View: %@", headerView);
-    }
-    return headerView;
-}
-
 - (IBAction)addNewItem:(id)sender
 {
     // Make a new index path for the last row of the 0th section
@@ -55,14 +44,6 @@
     
     [[self tableView] insertRowsAtIndexPaths:[NSArray arrayWithObject:path]
                             withRowAnimation:UITableViewRowAnimationAutomatic];
-}
-
-- (IBAction)toggleEditingMode:(id)sender
-{
-    BOOL wasEditing = [[self tableView] isEditing];
-    [sender setTitle:(wasEditing ? @"Edit" : @"Done") forState:(UIControlStateNormal)];
-    [[self tableView] setEditing:!wasEditing animated:YES];
-//    [[(UIButton *)sender titleLabel] setText:(wasEditing ? @"Edit" : @"Done")];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -126,18 +107,6 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 // Data Source stuff
 // =================
 // The following two methods are required to implement a Header View
-- (UIView *)tableView:(UITableView *)tableView
-viewForHeaderInSection:(NSInteger)section
-{
-    return [self headerView];
-}
-
-- (CGFloat)tableView:(UITableView *)tableView
-heightForHeaderInSection:(NSInteger)section
-{
-    return [[self headerView] bounds].size.height;
-}
-
 - (NSInteger)tableView:(UITableView *)tableView
  numberOfRowsInSection:(NSInteger)section
 {
