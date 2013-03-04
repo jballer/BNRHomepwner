@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 @class BNRItem;
 
-@interface DetailViewController : UIViewController
+@interface DetailViewController : UIViewController <UITextFieldDelegate>
 {
     __weak IBOutlet UITextField *nameField;
     __weak IBOutlet UITextField *serialNumberField;

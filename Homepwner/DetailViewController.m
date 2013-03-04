@@ -52,6 +52,18 @@
     
     // BRONZE CHALLENGE: use number keyboard for value field
     [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
+    
+    //SILVER CHALLENGE: find a way to dismiss the number keyboard
+    UIToolbar *accessoryToolbar = [[UIToolbar alloc]
+                                   initWithFrame:CGRectMake(0, 0, 0, 30)];
+    [accessoryToolbar setBarStyle:UIBarStyleBlackTranslucent];
+    [accessoryToolbar setItems:[NSArray arrayWithObjects:
+                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                              target:valueField
+                                                                              action:@selector(resignFirstResponder)],
+                                nil]];
+    [valueField setInputAccessoryView:accessoryToolbar];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -69,6 +81,16 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [[self view] setBackgroundColor:[UIColor groupTableViewBackgroundColor]];
+    
+    [nameField setDelegate:self];
+    [serialNumberField setDelegate:self];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    // SILVER CHALLENGE+: went ahead and set return to dismiss the other keyboards
+    [textField resignFirstResponder];
+    return NO;
 }
 
 - (void)didReceiveMemoryWarning
