@@ -49,6 +49,9 @@
     [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
     
     [dateLabel setText:[dateFormatter stringFromDate:[item dateCreated]]];
+    
+    // BRONZE CHALLENGE: use number keyboard for value field
+    [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
