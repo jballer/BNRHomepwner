@@ -15,6 +15,11 @@
 
 @implementation DetailViewController
 
+// Hidden text field?
+UITextView *dateChanger;
+UIDatePicker *datePickerView;
+UIAlertView *dateChangeWarning;
+
 @synthesize item;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -22,6 +27,25 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        dateChangeWarning = [[UIAlertView alloc] initWithTitle:@"Be Cool." message:@"Don't commit insurance fraud!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Continue", nil];
+        dateChanger = [[UITextView alloc] init];
+        datePickerView = [[UIDatePicker alloc] init];
+        [datePickerView setDatePickerMode:UIDatePickerModeDateAndTime];
+        [dateChanger setInputView:datePickerView];
+        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 0, 30)];
+        [toolbar setBarStyle:UIBarStyleBlackOpaque];
+        [toolbar setItems:[NSArray arrayWithObjects:
+                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                         target:dateChanger
+                                                                         action:@selector(resignFirstResponder)],
+                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
+                                                                         target:self
+                                                                         action:@selector(saveNewDate)],
+                           nil]];
+        [dateChanger setInputAccessoryView:toolbar];
+        [[self view] addSubview:dateChanger];
+
     }
     return self;
 }
@@ -30,6 +54,15 @@
 {
     item = i;
     [[self navigationItem] setTitle:[i itemName]];
+}
+
+- (void)updateDateLabel
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+
+    [dateLabel setText:[dateFormatter stringFromDate:[item dateCreated]]];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -43,12 +76,8 @@
     [nameField setText:[item itemName]];
     [serialNumberField setText:[item serialNumber]];
     [valueField setText:[NSString stringWithFormat:@"%d",[item valueInDollars]]];
-    
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
-    [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
-    
-    [dateLabel setText:[dateFormatter stringFromDate:[item dateCreated]]];
+    [self updateDateLabel];
+    [datePickerView setDate:[item dateCreated] animated:NO];
     
     // BRONZE CHALLENGE: use number keyboard for value field
     [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
@@ -91,6 +120,37 @@
     // SILVER CHALLENGE+: went ahead and set return to dismiss the other keyboards
     [textField resignFirstResponder];
     return NO;
+}
+
+- (void)changeDate:(id)sender
+{
+    [dateChangeWarning show];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView == dateChangeWarning) {
+        switch (buttonIndex) {
+            case 1:
+                [self changeDateContinuePastWarning];
+                break;
+                
+            default:
+                break;
+        }
+    }
+}
+
+- (void)changeDateContinuePastWarning
+{
+    [dateChanger becomeFirstResponder];
+}
+
+- (void)saveNewDate
+{
+    [item setDateCreated:[datePickerView date]];
+    [self updateDateLabel];
+    [dateChanger resignFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning
