@@ -15,7 +15,7 @@
 
 @implementation DetailViewController
 
-// Hidden text field?
+// Hidden text field to get an input view (date picker)
 UITextView *dateChanger;
 UIDatePicker *datePickerView;
 UIAlertView *dateChangeWarning;
@@ -125,6 +125,38 @@ UIAlertView *dateChangeWarning;
 - (void)changeDate:(id)sender
 {
     [dateChangeWarning show];
+}
+
+- (IBAction)takePicture:(id)sender
+{
+    // Create an image picker (using camera if available)
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+    {
+        [imagePicker setSourceType:UIImagePickerControllerSourceTypeCamera];
+    }
+    else
+    {
+        [imagePicker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
+    }
+    
+    // Set this controllare as the image picker's delegate
+    [imagePicker setDelegate:self];
+    
+    [self presentViewController:imagePicker animated:YES completion:nil];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    // Use the image in the imageView
+    [imageView setImage:[info objectForKey:UIImagePickerControllerOriginalImage]];
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    // Dismiss the image picker if it's canceled
+    [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex

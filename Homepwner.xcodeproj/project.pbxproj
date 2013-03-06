@@ -21,6 +21,7 @@
 		50A1D1B616E2EB5D0006201A /* BNRItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1B216E2E2DC0006201A /* BNRItem.m */; };
 		50A1D1BC16E3448C0006201A /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1BA16E3448C0006201A /* DetailViewController.m */; };
 		50A1D1BD16E3448C0006201A /* DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 50A1D1BB16E3448C0006201A /* DetailViewController.xib */; };
+		50A1D1C716E6ECBF0006201A /* BNRImageStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1C616E6ECBF0006201A /* BNRImageStore.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,8 @@
 		50A1D1B916E3448C0006201A /* DetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
 		50A1D1BA16E3448C0006201A /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
 		50A1D1BB16E3448C0006201A /* DetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DetailViewController.xib; sourceTree = "<group>"; };
+		50A1D1C516E6ECBF0006201A /* BNRImageStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BNRImageStore.h; sourceTree = "<group>"; };
+		50A1D1C616E6ECBF0006201A /* BNRImageStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BNRImageStore.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +68,8 @@
 		50A1D18216E2E0C10006201A = {
 			isa = PBXGroup;
 			children = (
+				50A1D1C516E6ECBF0006201A /* BNRImageStore.h */,
+				50A1D1C616E6ECBF0006201A /* BNRImageStore.m */,
 				50A1D1B316E2E2F20006201A /* BNRItemStore.h */,
 				50A1D1B416E2E2F20006201A /* BNRItemStore.m */,
 				50A1D1B116E2E2DC0006201A /* BNRItem.h */,
@@ -195,6 +200,7 @@
 				50A1D1B016E2E1070006201A /* ItemsViewController.m in Sources */,
 				50A1D1B516E2E2F20006201A /* BNRItemStore.m in Sources */,
 				50A1D1BC16E3448C0006201A /* DetailViewController.m in Sources */,
+				50A1D1C716E6ECBF0006201A /* BNRImageStore.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
