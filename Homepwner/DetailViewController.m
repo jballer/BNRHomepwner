@@ -8,6 +8,7 @@
 
 #import "DetailViewController.h"
 #import "BNRItem.h"
+#import "BNRImageStore.h"
 
 @interface DetailViewController ()
 
@@ -82,17 +83,13 @@ UIAlertView *dateChangeWarning;
     // BRONZE CHALLENGE: use number keyboard for value field
     [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
     
-    //SILVER CHALLENGE: find a way to dismiss the number keyboard
-    UIToolbar *accessoryToolbar = [[UIToolbar alloc]
-                                   initWithFrame:CGRectMake(0, 0, 0, 30)];
-    [accessoryToolbar setBarStyle:UIBarStyleBlackTranslucent];
-    [accessoryToolbar setItems:[NSArray arrayWithObjects:
-                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                              target:valueField
-                                                                              action:@selector(resignFirstResponder)],
-                                nil]];
-    [valueField setInputAccessoryView:accessoryToolbar];
+    // Get the image ID
+    if ([item imageKey]){
+        [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
+    }
+    else {
+        [imageView setImage:nil];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -113,6 +110,18 @@ UIAlertView *dateChangeWarning;
     
     [nameField setDelegate:self];
     [serialNumberField setDelegate:self];
+
+    //SILVER CHALLENGE: find a way to dismiss the number keyboard
+    UIToolbar *accessoryToolbar = [[UIToolbar alloc]
+                                   initWithFrame:CGRectMake(0, 0, 0, 30)];
+    [accessoryToolbar setBarStyle:UIBarStyleBlackTranslucent];
+    [accessoryToolbar setItems:[NSArray arrayWithObjects:
+                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                                [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                              target:valueField
+                                                                              action:@selector(resignFirstResponder)],
+                                nil]];
+    [valueField setInputAccessoryView:accessoryToolbar];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -146,10 +155,42 @@ UIAlertView *dateChangeWarning;
     [self presentViewController:imagePicker animated:YES completion:nil];
 }
 
+- (IBAction)backgroundTapped:(id)sender {
+    // Dismiss keyboard when the view is tapped
+    [[self view] endEditing:YES];
+}
+
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
+    // If there was an old image, get rid of it
+    NSString *oldImageKey = [item imageKey];
+    if (oldImageKey) {
+        [[BNRImageStore sharedStore] deleteImageForKey:oldImageKey];
+    }
+    
+    // Get the new image
+    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    
+    // Create UUID for the image
+    CFUUIDRef newUniqueID = CFUUIDCreate(kCFAllocatorDefault);
+    
+    // turn UUID into a (CF) string
+    CFStringRef newUniqueIDString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueID);
+    
+    // turn the CFString reference into an NSString *
+    NSString *key = (__bridge NSString *)newUniqueIDString;
+    [item setImageKey:key];
+    
+    // Put the image in ImageStore with this UUID key
+    [[BNRImageStore sharedStore] setImage:image
+                                   forKey:key];
+    
+    // Release the pointers for CF memory management
+    CFRelease(newUniqueIDString);
+    CFRelease(newUniqueID);
+    
     // Use the image in the imageView
-    [imageView setImage:[info objectForKey:UIImagePickerControllerOriginalImage]];
+
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
 

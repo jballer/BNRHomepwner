@@ -20,7 +20,7 @@
     static BNRImageStore *sharedStore = nil;
     if (!sharedStore)
         sharedStore = [[super allocWithZone:nil] init];
-    return nil;
+    return sharedStore;
 }
 
 - (id)init
