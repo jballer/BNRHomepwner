@@ -21,6 +21,8 @@ UITextView *dateChanger;
 UIDatePicker *datePickerView;
 UIAlertView *dateChangeWarning;
 
+UIActionSheet *imageRemoveConfirmSheet;
+
 @synthesize item;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -152,12 +154,50 @@ UIAlertView *dateChangeWarning;
     // Set this controllare as the image picker's delegate
     [imagePicker setDelegate:self];
     
+    // BRONZE CHALLENGE: enable editing
+    [imagePicker setAllowsEditing:YES];
+    
     [self presentViewController:imagePicker animated:YES completion:nil];
 }
 
 - (IBAction)backgroundTapped:(id)sender {
     // Dismiss keyboard when the view is tapped
     [[self view] endEditing:YES];
+}
+
+- (IBAction)removePicture:(id)sender {
+    if ([item imageKey] == nil) {
+        return;
+    }
+    
+    imageRemoveConfirmSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                            delegate:self
+                                                   cancelButtonTitle:@"Cancel"
+                                              destructiveButtonTitle:@"Remove Image"
+                                                   otherButtonTitles:nil];
+    [imageRemoveConfirmSheet showInView:[self view]];
+}
+
+- (void)removePictureAfterUserConfirmed
+{
+    // Get the image out of the view
+    [imageView setImage:nil];
+    
+    // Remove the key from the BNRItem
+    NSString *keyToRemove = [item imageKey];
+    [item setImageKey:nil];
+    
+    // Remove the image and the key from the Image Store
+    [[BNRImageStore sharedStore] deleteImageForKey:keyToRemove];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (actionSheet == imageRemoveConfirmSheet)
+    {
+        if (buttonIndex == [actionSheet destructiveButtonIndex])
+            [self removePictureAfterUserConfirmed];
+    }
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
@@ -169,7 +209,11 @@ UIAlertView *dateChangeWarning;
     }
     
     // Get the new image
-    UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    UIImage *image = nil;
+    // BRONZE CHALLENGE: use edited image if available
+    if (!(image = [info objectForKey:UIImagePickerControllerEditedImage])) {
+        image = [info objectForKey:UIImagePickerControllerOriginalImage];
+    }
     
     // Create UUID for the image
     CFUUIDRef newUniqueID = CFUUIDCreate(kCFAllocatorDefault);

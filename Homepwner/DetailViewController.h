@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 @class BNRItem;
 
-@interface DetailViewController : UIViewController <UITextFieldDelegate, UIAlertViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface DetailViewController : UIViewController <UITextFieldDelegate, UIAlertViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate>
 {
     __weak IBOutlet UITextField *nameField;
     __weak IBOutlet UITextField *serialNumberField;
@@ -23,5 +23,6 @@
 - (IBAction)changeDate:(id)sender;
 - (IBAction)takePicture:(id)sender;
 - (IBAction)backgroundTapped:(id)sender;
+- (IBAction)removePicture:(id)sender;
 
 @end
