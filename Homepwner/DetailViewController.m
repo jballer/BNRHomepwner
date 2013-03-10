@@ -9,6 +9,7 @@
 #import "DetailViewController.h"
 #import "BNRItem.h"
 #import "BNRImageStore.h"
+#import "CameraOverlayView.h"
 
 @interface DetailViewController ()
 
@@ -145,6 +146,11 @@ UIActionSheet *imageRemoveConfirmSheet;
     if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
     {
         [imagePicker setSourceType:UIImagePickerControllerSourceTypeCamera];
+        
+        // GOLD CHALLENGE: Overlay a crosshair
+        CGRect frame = [[[UIApplication sharedApplication] keyWindow] frame];
+        CameraOverlayView *overlay = [[CameraOverlayView alloc] initWithFrame:frame];
+        [imagePicker setCameraOverlayView:overlay];
     }
     else
     {

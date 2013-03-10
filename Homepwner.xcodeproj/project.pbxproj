@@ -22,6 +22,7 @@
 		50A1D1BC16E3448C0006201A /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1BA16E3448C0006201A /* DetailViewController.m */; };
 		50A1D1BD16E3448C0006201A /* DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 50A1D1BB16E3448C0006201A /* DetailViewController.xib */; };
 		50A1D1C716E6ECBF0006201A /* BNRImageStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 50A1D1C616E6ECBF0006201A /* BNRImageStore.m */; };
+		50AC9AF816ECEA9B0072922F /* CameraOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 50AC9AF716ECEA9B0072922F /* CameraOverlayView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,8 @@
 		50A1D1BB16E3448C0006201A /* DetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DetailViewController.xib; sourceTree = "<group>"; };
 		50A1D1C516E6ECBF0006201A /* BNRImageStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BNRImageStore.h; sourceTree = "<group>"; };
 		50A1D1C616E6ECBF0006201A /* BNRImageStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BNRImageStore.m; sourceTree = "<group>"; };
+		50AC9AF616ECEA9B0072922F /* CameraOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraOverlayView.h; sourceTree = "<group>"; };
+		50AC9AF716ECEA9B0072922F /* CameraOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraOverlayView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +110,8 @@
 				50A1D19E16E2E0C10006201A /* HomepwnerAppDelegate.m */,
 				50A1D1B916E3448C0006201A /* DetailViewController.h */,
 				50A1D1BA16E3448C0006201A /* DetailViewController.m */,
+				50AC9AF616ECEA9B0072922F /* CameraOverlayView.h */,
+				50AC9AF716ECEA9B0072922F /* CameraOverlayView.m */,
 				50A1D1BB16E3448C0006201A /* DetailViewController.xib */,
 				50A1D19516E2E0C10006201A /* Supporting Files */,
 			);
@@ -201,6 +206,7 @@
 				50A1D1B516E2E2F20006201A /* BNRItemStore.m in Sources */,
 				50A1D1BC16E3448C0006201A /* DetailViewController.m in Sources */,
 				50A1D1C716E6ECBF0006201A /* BNRImageStore.m in Sources */,
+				50AC9AF816ECEA9B0072922F /* CameraOverlayView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

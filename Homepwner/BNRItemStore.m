@@ -43,7 +43,6 @@
 {
     BNRItem *newItem = [BNRItem randomItem];
     [allItems addObject:newItem];
-    NSLog(@"All Items:\r%@", allItems);
     return newItem;
 }
 

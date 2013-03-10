@@ -92,9 +92,9 @@
     return descriptionString;
 }
 
-- (void)dealloc
-{
-    NSLog(@"Destroyed: %@", self);
-}
+//- (void)dealloc
+//{
+//    NSLog(@"Destroyed: %@", self);
+//}
 
 @end
