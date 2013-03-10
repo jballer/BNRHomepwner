@@ -17,6 +17,8 @@
     __weak IBOutlet UILabel *dateLabel;
     __weak IBOutlet UIImageView *imageView;
     __weak IBOutlet UIButton *changeDateButton;
+    
+    UIPopoverController *imagePickerPopover;
 }
 @property (nonatomic, strong) BNRItem *item;
 

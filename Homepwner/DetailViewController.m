@@ -54,6 +54,14 @@ UIActionSheet *imageRemoveConfirmSheet;
     return self;
 }
 
+- (NSUInteger)supportedInterfaceOrientations
+{
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+        return UIInterfaceOrientationMaskAll;
+    else
+        return UIInterfaceOrientationMaskPortrait;
+}
+
 - (void)setItem:(BNRItem *)i
 {
     item = i;
@@ -109,7 +117,20 @@ UIActionSheet *imageRemoveConfirmSheet;
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    [[self view] setBackgroundColor:[UIColor groupTableViewBackgroundColor]];
+ 
+    // Set background based on device type
+    UIColor *clr = nil;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        clr = [UIColor groupTableViewBackgroundColor];
+    }
+    else
+    {
+        clr = [UIColor colorWithRed:0.875
+                              green:0.88
+                               blue:0.91
+                              alpha:1];
+    }
+    [[self view] setBackgroundColor:clr];
     
     [nameField setDelegate:self];
     [serialNumberField setDelegate:self];
@@ -148,9 +169,12 @@ UIActionSheet *imageRemoveConfirmSheet;
         [imagePicker setSourceType:UIImagePickerControllerSourceTypeCamera];
         
         // GOLD CHALLENGE: Overlay a crosshair
-        CGRect frame = [[[UIApplication sharedApplication] keyWindow] frame];
-        CameraOverlayView *overlay = [[CameraOverlayView alloc] initWithFrame:frame];
-        [imagePicker setCameraOverlayView:overlay];
+        // TODO: figure out how to realign on iPad rotate
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone){
+            CGRect frame = [[[UIApplication sharedApplication] keyWindow] frame];
+            CameraOverlayView *overlay = [[CameraOverlayView alloc] initWithFrame:frame];
+            [imagePicker setCameraOverlayView:overlay];
+        }
     }
     else
     {
