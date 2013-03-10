@@ -187,7 +187,23 @@ UIActionSheet *imageRemoveConfirmSheet;
     // BRONZE CHALLENGE: enable editing
     [imagePicker setAllowsEditing:YES];
     
-    [self presentViewController:imagePicker animated:YES completion:nil];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        imagePickerPopover = [[UIPopoverController alloc] initWithContentViewController:imagePicker];
+        [imagePickerPopover setDelegate:self];
+        
+        [imagePickerPopover presentPopoverFromBarButtonItem:sender
+                                   permittedArrowDirections:UIPopoverArrowDirectionAny
+                                                   animated:YES];
+    }
+    else {
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }
+}
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
+{
+    NSLog(@"User dismissed popover %@", popoverController);
+    imagePickerPopover = nil;
 }
 
 - (IBAction)backgroundTapped:(id)sender {
