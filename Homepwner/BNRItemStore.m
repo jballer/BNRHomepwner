@@ -59,7 +59,7 @@
 
 - (BNRItem *)createItem
 {
-    BNRItem *newItem = [BNRItem randomItem];
+    BNRItem *newItem = [[BNRItem alloc] init];
     [allItems addObject:newItem];
     return newItem;
 }
