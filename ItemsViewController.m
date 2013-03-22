@@ -37,13 +37,24 @@
     
     BNRItem *newItem = [[BNRItemStore sharedStore] createItem];
     
-    NSInteger rowForNewItem = [[[BNRItemStore sharedStore] allItems] indexOfObject:newItem];
+//    NSInteger rowForNewItem = [[[BNRItemStore sharedStore] allItems] indexOfObject:newItem];
+//    
+//    NSIndexPath *path = [NSIndexPath indexPathForRow:rowForNewItem
+//                                           inSection:0];
+//    
+//    [[self tableView] insertRowsAtIndexPaths:[NSArray arrayWithObject:path]
+//                            withRowAnimation:UITableViewRowAnimationAutomatic];
     
-    NSIndexPath *path = [NSIndexPath indexPathForRow:rowForNewItem
-                                           inSection:0];
+    DetailViewController *detailViewController = [[DetailViewController alloc] initForNewItem:YES];
+    [detailViewController setItem:newItem];
+    [detailViewController setDismissBlock:^{
+        [[self tableView] reloadData];
+    }];
     
-    [[self tableView] insertRowsAtIndexPaths:[NSArray arrayWithObject:path]
-                            withRowAnimation:UITableViewRowAnimationAutomatic];
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:detailViewController];
+    [navController setModalPresentationStyle:UIModalPresentationFullScreen];
+    [navController setModalTransitionStyle:UIModalTransitionStylePartialCurl];
+    [self presentViewController:navController animated:YES completion:nil];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -97,7 +108,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if ([indexPath row] != [[self tableView] numberOfRowsInSection:[indexPath section]] - 1)
     {
-        DetailViewController *detail = [[DetailViewController alloc] init];
+        DetailViewController *detail = [[DetailViewController alloc] initForNewItem:NO];
         [detail setItem:[[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]]];
         [[self navigationController] pushViewController:detail animated:YES];
     }

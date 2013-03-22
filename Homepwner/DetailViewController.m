@@ -8,6 +8,7 @@
 
 #import "DetailViewController.h"
 #import "BNRItem.h"
+#import "BNRItemStore.h"
 #import "BNRImageStore.h"
 #import "CameraOverlayView.h"
 
@@ -24,34 +25,76 @@ UIAlertView *dateChangeWarning;
 
 UIActionSheet *imageRemoveConfirmSheet;
 
-@synthesize item;
+@synthesize item, dismissBlock;
+
+- (id)initForNewItem:(BOOL)isNew
+{
+    self = [super initWithNibName:@"DetailViewController" bundle:nil];
+    if (self)
+    {
+        // Custom initialization
+        
+        // Initialize the date picker
+        [self setUpDateChanger];
+        [[self view] addSubview:dateChanger];
+        
+        if (isNew) {
+            UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                      target:self
+                                                                                      action:@selector(save:)];
+            [[self navigationItem] setRightBarButtonItem:doneItem];
+
+            UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                                        target:self
+                                                                                        action:@selector(cancel:)];
+            [[self navigationItem] setLeftBarButtonItem:cancelItem];
+        }
+    }
+    return self;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-        dateChangeWarning = [[UIAlertView alloc] initWithTitle:@"Be Cool." message:@"Don't commit insurance fraud!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Continue", nil];
-        dateChanger = [[UITextView alloc] init];
-        datePickerView = [[UIDatePicker alloc] init];
-        [datePickerView setDatePickerMode:UIDatePickerModeDateAndTime];
-        [dateChanger setInputView:datePickerView];
-        UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 0, 30)];
-        [toolbar setBarStyle:UIBarStyleBlackOpaque];
-        [toolbar setItems:[NSArray arrayWithObjects:
-                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                                                         target:dateChanger
-                                                                         action:@selector(resignFirstResponder)],
-                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                           [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
-                                                                         target:self
-                                                                         action:@selector(saveNewDate)],
-                           nil]];
-        [dateChanger setInputAccessoryView:toolbar];
-        [[self view] addSubview:dateChanger];
+    @throw [NSException exceptionWithName:@"Wrong Initializer"
+                                   reason:@"Use initForNewItem"
+                                 userInfo:nil];
+    return nil;
+}
 
-    }
-    return self;
+- (void)save:(id)sender
+{
+    [[self presentingViewController] dismissViewControllerAnimated:YES
+                                                        completion:dismissBlock];
+}
+
+- (void)cancel:(id)sender
+{
+    // If user canceled, remove the BNRItem from the store
+    [[BNRItemStore sharedStore] removeItem:item];
+    
+    [[self presentingViewController] dismissViewControllerAnimated:YES
+                                                        completion:dismissBlock];
+}
+
+
+- (void)setUpDateChanger
+{
+    dateChanger = [[UITextView alloc] init];
+    datePickerView = [[UIDatePicker alloc] init];
+    [datePickerView setDatePickerMode:UIDatePickerModeDateAndTime];
+    [dateChanger setInputView:datePickerView];
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 0, 30)];
+    [toolbar setBarStyle:UIBarStyleBlackOpaque];
+    [toolbar setItems:[NSArray arrayWithObjects:
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                     target:dateChanger
+                                                                     action:@selector(resignFirstResponder)],
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
+                                                                     target:self
+                                                                     action:@selector(saveNewDate)],
+                       nil]];
+    [dateChanger setInputAccessoryView:toolbar];
 }
 
 - (NSUInteger)supportedInterfaceOrientations
@@ -80,7 +123,7 @@ UIActionSheet *imageRemoveConfirmSheet;
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+
     // Clear the first responder
     [[self view] endEditing:YES];
     
@@ -118,19 +161,21 @@ UIActionSheet *imageRemoveConfirmSheet;
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
  
-    // Set background based on device type
-    UIColor *clr = nil;
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        clr = [UIColor groupTableViewBackgroundColor];
+    // Set background to TableView look
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            [[self view] setBackgroundColor:[UIColor colorWithRed:0.875
+                                                            green:0.88
+                                                             blue:0.91
+                                                            alpha:1]];
     }
     else
     {
-        clr = [UIColor colorWithRed:0.875
-                              green:0.88
-                               blue:0.91
-                              alpha:1];
+        // Apparently groupTableViewBackgroundColor is deprecated; use an actual UITableView to get this look.
+        [[self view] setBackgroundColor:[UIColor clearColor]];
+        UITableView *tv = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        [[self view] addSubview:tv];
+        [[self view] sendSubviewToBack:tv];
     }
-    [[self view] setBackgroundColor:clr];
     
     [nameField setDelegate:self];
     [serialNumberField setDelegate:self];
@@ -157,11 +202,47 @@ UIActionSheet *imageRemoveConfirmSheet;
 
 - (void)changeDate:(id)sender
 {
+    dateChangeWarning = [[UIAlertView alloc] initWithTitle:@"Be Cool." message:@"Don't commit insurance fraud!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Continue", nil];
     [dateChangeWarning show];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView == dateChangeWarning) {
+        switch (buttonIndex) {
+            case 1:
+                [self changeDateContinuePastWarning];
+                break;
+                
+            default:
+                break;
+        }
+        dateChangeWarning = nil;
+    }
+}
+
+- (void)changeDateContinuePastWarning
+{
+    [dateChanger becomeFirstResponder];
+}
+
+- (void)saveNewDate
+{
+    [item setDateCreated:[datePickerView date]];
+    [self updateDateLabel];
+    [dateChanger resignFirstResponder];
 }
 
 - (IBAction)takePicture:(id)sender
 {
+    // If the popover is already presented, use the button dismiss it
+    if ([imagePickerPopover isPopoverVisible])
+    {
+        [imagePickerPopover dismissPopoverAnimated:YES];
+        imagePickerPopover = nil;
+        return;
+    }
+    
     // Create an image picker (using camera if available)
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     if([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
@@ -190,7 +271,7 @@ UIActionSheet *imageRemoveConfirmSheet;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         imagePickerPopover = [[UIPopoverController alloc] initWithContentViewController:imagePicker];
         [imagePickerPopover setDelegate:self];
-        
+        // TODO: Fix rotation. Camera rotates, but popover doesn't.
         [imagePickerPopover presentPopoverFromBarButtonItem:sender
                                    permittedArrowDirections:UIPopoverArrowDirectionAny
                                                    animated:YES];
@@ -280,40 +361,19 @@ UIActionSheet *imageRemoveConfirmSheet;
     CFRelease(newUniqueID);
     
     // Use the image in the imageView
-
-    [picker dismissViewControllerAnimated:YES completion:nil];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        [imagePickerPopover dismissPopoverAnimated:YES];
+        imagePickerPopover = nil;
+    }
+    else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
     // Dismiss the image picker if it's canceled
     [picker dismissViewControllerAnimated:YES completion:nil];
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (alertView == dateChangeWarning) {
-        switch (buttonIndex) {
-            case 1:
-                [self changeDateContinuePastWarning];
-                break;
-                
-            default:
-                break;
-        }
-    }
-}
-
-- (void)changeDateContinuePastWarning
-{
-    [dateChanger becomeFirstResponder];
-}
-
-- (void)saveNewDate
-{
-    [item setDateCreated:[datePickerView date]];
-    [self updateDateLabel];
-    [dateChanger resignFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning

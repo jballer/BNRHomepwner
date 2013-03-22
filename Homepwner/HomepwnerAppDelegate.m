@@ -8,8 +8,12 @@
 
 #import "HomepwnerAppDelegate.h"
 #import "ItemsViewController.h"
+#import "DetailViewController.h"
+#import "BNRItemStore.h"
 
 @implementation HomepwnerAppDelegate
+
+// TODO: Chapter 13 Gold Challenge (custom UIPopoverBackgroundView)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -24,7 +28,7 @@
     
     // Add the Navigation Controller to the view hierarchy
     [[self window] setRootViewController:navController];
-
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
