@@ -28,8 +28,20 @@
     self = [super init];
     if (self) {
         dictionary = [[NSMutableDictionary alloc] init];
+        
+        NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+        [nc addObserver:self
+               selector:@selector(clearCache:)
+                   name:UIApplicationDidReceiveMemoryWarningNotification
+                 object:nil];
     }
     return self;
+}
+
+- (void)clearCache:(id)sender
+{
+    NSLog(@"Flushing %d images from the cache", [dictionary count]);
+    [dictionary removeAllObjects];
 }
 
 - (NSString *)pathForImageKey:(NSString *)key

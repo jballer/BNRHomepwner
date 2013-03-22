@@ -173,6 +173,7 @@ UIActionSheet *imageRemoveConfirmSheet;
         // Apparently groupTableViewBackgroundColor is deprecated; use an actual UITableView to get this look.
         [[self view] setBackgroundColor:[UIColor clearColor]];
         UITableView *tv = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        [tv setUserInteractionEnabled:NO]; // don't let the TableView catch touches - it has no delegate!
         [[self view] addSubview:tv];
         [[self view] sendSubviewToBack:tv];
     }
@@ -287,9 +288,10 @@ UIActionSheet *imageRemoveConfirmSheet;
     imagePickerPopover = nil;
 }
 
-- (IBAction)backgroundTapped:(id)sender {
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
     // Dismiss keyboard when the view is tapped
     [[self view] endEditing:YES];
+    [super touchesEnded:touches withEvent:event];
 }
 
 - (IBAction)removePicture:(id)sender {
