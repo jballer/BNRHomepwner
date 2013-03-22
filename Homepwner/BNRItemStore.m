@@ -8,6 +8,7 @@
 
 #import "BNRItemStore.h"
 #import "BNRItem.h"
+#import "BNRImageStore.h"
 
 @implementation BNRItemStore
 
@@ -66,6 +67,10 @@
 
 - (void)removeItem:(BNRItem *)p
 {
+    if ([p imageKey])
+    {
+        [[BNRImageStore sharedStore] deleteImageForKey:[p imageKey]];
+    }
     [allItems removeObjectIdenticalTo:p]; // This goes by pointer instead of isEqual.
 }
 
