@@ -92,6 +92,31 @@
     return descriptionString;
 }
 
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:itemName forKey:@"itemName"];
+    [aCoder encodeObject:serialNumber forKey:@"serialNumber"];
+    [aCoder encodeObject:dateCreated forKey:@"dateCreated"];
+    [aCoder encodeObject:imageKey forKey:@"imageKey"];
+    
+    [aCoder encodeInt:valueInDollars forKey:@"valueInDollars"];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super init];
+    if (self) {
+        itemName = [aDecoder decodeObjectForKey:@"itemName"];
+        serialNumber = [aDecoder decodeObjectForKey:@"serialNumber"];
+        dateCreated = [aDecoder decodeObjectForKey:@"dateCreated"];
+        imageKey = [aDecoder decodeObjectForKey:@"imageKey"];
+        
+        valueInDollars = [aDecoder decodeIntForKey:@"valueInDollars"];
+    }
+    return self;
+
+}
+
 //- (void)dealloc
 //{
 //    NSLog(@"Destroyed: %@", self);
