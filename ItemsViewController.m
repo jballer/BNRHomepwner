@@ -222,6 +222,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         [cell setController:self];
         [cell setTableView:tableView];
         
+// BRONZE CHALLENGE
+        [[cell valueLabel] setTextColor: ([currentItem valueInDollars] > 50) ?
+         [UIColor greenColor] : [UIColor redColor]];
+        
         return cell;
     }
 }
