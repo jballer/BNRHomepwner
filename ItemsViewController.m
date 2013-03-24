@@ -6,11 +6,13 @@
 //  Copyright (c) 2013 jballer. All rights reserved.
 //
 
-#import "ItemsViewController.h"
 #import "BNRItem.h"
 #import "BNRItemStore.h"
+#import "BNRImageStore.h"
 #import "DetailViewController.h"
 #import "HomepwnerItemCell.h"
+#import "ImageViewController.h"
+#import "ItemsViewController.h"
 
 @implementation ItemsViewController
 
@@ -41,7 +43,7 @@
     [[self tableView] registerNib:nib forCellReuseIdentifier:@"HomepwnerItemCell"];
 }
 
-- (IBAction)addNewItem:(id)sender
+- (void)addNewItem:(id)sender
 {
     // Make a new index path for the last row of the 0th section
     
@@ -82,6 +84,47 @@
 //    [self presentViewController:ivc
 //                       animated:YES
 //                     completion:<#^(void)completion#>]
+    
+    // Use a popover if this is on an iPad
+    if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        // get the item for the indexpath
+        BNRItem *item = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+        
+        UIImage *img = [[BNRImageStore sharedStore] imageForKey:[item imageKey]];
+        
+        if (!img)
+            return;
+        
+        // Make a rect of the button relative to this view
+        CGRect rect = [[self view] convertRect:[sender bounds] fromView:sender];
+        NSLog(@"sender: %@", sender);
+        
+        // Make a new ImageViewController and set its image
+        ImageViewController *ivc = [[ImageViewController alloc] init];
+        [ivc setImage:img];
+        
+        // Present a 600x600 popover from the rect
+        imagePopover = [[UIPopoverController alloc] initWithContentViewController:ivc];
+        [imagePopover setDelegate:self];
+        [imagePopover setPopoverContentSize:CGSizeMake(600, 600)];
+        [imagePopover presentPopoverFromRect:rect
+                                      inView:[self view]
+                    permittedArrowDirections:UIPopoverArrowDirectionAny
+                                    animated:YES];
+        
+    }
+}
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
+{
+    NSLog(@"Popover properties…\r");
+    ImageViewController *ivc = (ImageViewController *)[popoverController contentViewController];
+    
+    NSLog(@"ScrollView content size: %f x %f", [[ivc scrollView] contentSize].width, [[ivc scrollView] contentSize].height);
+    NSLog(@"ImageView image size: %f x %f", [[ivc image] size].width, [[ivc image] size].height);
+    [imagePopover dismissPopoverAnimated:YES];
+    imagePopover = nil;
 }
 
 // =================
@@ -159,7 +202,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         // Last item (static)
         UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
         [[cell textLabel] setText:@"No more items!"];
-
+        
         return cell;
     }
 

@@ -8,12 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ItemsViewController : UITableViewController
+@interface ItemsViewController : UITableViewController <UIPopoverControllerDelegate>
 {
-    IBOutlet UIView *headerView; // This is a strong reference because it's a top-level object in the XIB
+    UIPopoverController *imagePopover;
+//    IBOutlet UIView *headerView; // This is a strong reference because it's a top-level object in the XIB
 }
 
-- (IBAction)addNewItem:(id)sender;
+- (void)addNewItem:(id)sender;
 
 - (void)showImage:(id)sender
       atIndexPath:(NSIndexPath *)indexPath;

@@ -57,6 +57,7 @@
     
     //BRONZE CHALLENGE: save as a PNG
     NSData *imageData = UIImagePNGRepresentation(i);
+//    NSData *imageData = UIImageJPEGRepresentation(i, 0.8);
     [imageData writeToFile:[self pathForImageKey:s] atomically:YES];
 }
 
@@ -76,6 +77,8 @@
             NSLog(@"Error: unable to find %@", [self pathForImageKey:key]);
         }
     }
+    
+    NSLog(@"ImageStore image size: %f x %f", [result size].width, [result size].height);
     return result;
 }
 

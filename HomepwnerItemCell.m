@@ -30,7 +30,7 @@
     
     if (indexPath && [[self controller] respondsToSelector:newSelector]) {
         [[self controller] performSelector:newSelector
-                                withObject:self
+                                withObject:sender
                                 withObject:indexPath];
     }
 }

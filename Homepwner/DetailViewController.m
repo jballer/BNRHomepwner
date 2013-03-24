@@ -267,7 +267,7 @@ UIActionSheet *imageRemoveConfirmSheet;
     [imagePicker setDelegate:self];
     
     // BRONZE CHALLENGE: enable editing
-    [imagePicker setAllowsEditing:YES];
+//    [imagePicker setAllowsEditing:YES];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         imagePickerPopover = [[UIPopoverController alloc] initWithContentViewController:imagePicker];
@@ -340,9 +340,10 @@ UIActionSheet *imageRemoveConfirmSheet;
     // Get the new image
     UIImage *image = nil;
     // BRONZE CHALLENGE: use edited image if available
-    if (!(image = [info objectForKey:UIImagePickerControllerEditedImage])) {
+    //TODO: figure out why Edited Image comes out at very low resolution
+//    if (!(image = [info objectForKey:UIImagePickerControllerEditedImage])) {
         image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    }
+//    }
     
     [item setThumbnailDataFromImage:image];
     
