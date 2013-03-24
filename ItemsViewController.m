@@ -75,6 +75,15 @@
     [[self tableView] reloadData];
 }
 
+- (void)showImage:(id)sender atIndexPath:(NSIndexPath *)indexPath
+{
+    NSLog(@"going to show image for %@", indexPath);
+//    UIViewController *ivc = [[UIViewController alloc] init];
+//    [self presentViewController:ivc
+//                       animated:YES
+//                     completion:<#^(void)completion#>]
+}
+
 // =================
 // Delegate stuff
 // =================
@@ -165,6 +174,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
         
         [[cell thumbnailView] setImage:[currentItem thumbnail]];
+        
+        // Tell the cell about the controller and view so it can act on them
+        [cell setController:self];
+        [cell setTableView:tableView];
         
         return cell;
     }

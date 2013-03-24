@@ -15,4 +15,10 @@
 @property (weak, nonatomic) IBOutlet UILabel *serialNumberLabel;
 @property (weak, nonatomic) IBOutlet UILabel *valueLabel;
 
+// These have to be weak so we avoid a retain loop
+@property (weak, nonatomic) id controller;
+@property (weak, nonatomic) UITableView *tableView;
+
+- (IBAction)showImage:(id)sender;
+
 @end

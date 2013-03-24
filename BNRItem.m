@@ -101,6 +101,8 @@
     [aCoder encodeObject:imageKey forKey:@"imageKey"];
     
     [aCoder encodeInt:valueInDollars forKey:@"valueInDollars"];
+    
+    [aCoder encodeObject:thumbnailData forKey:@"thumbnailData"];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder
@@ -113,6 +115,8 @@
         imageKey = [aDecoder decodeObjectForKey:@"imageKey"];
         
         valueInDollars = [aDecoder decodeIntForKey:@"valueInDollars"];
+        
+        thumbnailData = [aDecoder decodeObjectForKey:@"thumbnailData"];
     }
     return self;
 

@@ -15,4 +15,7 @@
 
 - (IBAction)addNewItem:(id)sender;
 
+- (void)showImage:(id)sender
+      atIndexPath:(NSIndexPath *)indexPath;
+
 @end

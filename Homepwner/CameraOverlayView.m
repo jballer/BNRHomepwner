@@ -16,6 +16,7 @@
     if (self) {
         // Initialization code
         [self setOpaque:NO];
+        [self setUserInteractionEnabled:NO];
     }
     return self;
 }
