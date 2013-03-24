@@ -10,6 +10,7 @@
 #import "BNRItem.h"
 #import "BNRItemStore.h"
 #import "DetailViewController.h"
+#import "HomepwnerItemCell.h"
 
 @implementation ItemsViewController
 
@@ -29,6 +30,15 @@
 - (id)initWithStyle:(UITableViewStyle)style
 {
     return [self init];
+}
+
+- (void)viewDidLoad
+{
+    // Load the NIB file
+    UINib *nib = [UINib nibWithNibName:@"HomepwnerItemCell" bundle:nil];
+    
+    // Register it with the TableView
+    [[self tableView] registerNib:nib forCellReuseIdentifier:@"HomepwnerItemCell"];
 }
 
 - (IBAction)addNewItem:(id)sender
@@ -98,7 +108,7 @@ titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
         // This means it went past the static row. Cap it at the second-to-last row.
         proposedDestinationIndexPath = [NSIndexPath indexPathForRow:maxRow
                                                           inSection:[proposedDestinationIndexPath section]];
-        NSLog(@"dragged too far");
+//        NSLog(@"dragged too far");
     }
     return proposedDestinationIndexPath;
 }
@@ -128,29 +138,36 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // Dequeue a cell
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
-    if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
-    }
+    // Dequeue a cell (don't need to init a new one if we registered a NIB!)
+//    HomepwnerItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HomepwnerItemCell"];
+//    if (!cell) {
+//        cell = [[HomepwnerItemCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
+//    }
     
     // The last item in the list is static
     if ([indexPath row] == ([[self tableView] numberOfRowsInSection:[indexPath section]] - 1))
     {
         // Last item (static)
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
+        UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"UITableViewCell"];
         [[cell textLabel] setText:@"No more items!"];
+
+        return cell;
     }
 
     // The rest of the items come from the BNRItemStore
     else
     {
-        
+        HomepwnerItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HomepwnerItemCell"];
         BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-        [[cell textLabel] setText:[currentItem description]];
+        
+        [[cell nameLabel] setText:[currentItem itemName]];
+        [[cell serialNumberLabel] setText:[currentItem serialNumber]];
+        [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
+        
+        [[cell thumbnailView] setImage:[currentItem thumbnail]];
+        
+        return cell;
     }
-    
-    return cell;
 }
 
 // Delete object when deleted by user in Edit mode

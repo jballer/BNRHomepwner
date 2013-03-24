@@ -344,6 +344,8 @@ UIActionSheet *imageRemoveConfirmSheet;
         image = [info objectForKey:UIImagePickerControllerOriginalImage];
     }
     
+    [item setThumbnailDataFromImage:image];
+    
     // Create UUID for the image
     CFUUIDRef newUniqueID = CFUUIDCreate(kCFAllocatorDefault);
     

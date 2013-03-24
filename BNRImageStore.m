@@ -55,7 +55,8 @@
 {
     [dictionary setObject:i forKey:s];
     
-    NSData *imageData = UIImageJPEGRepresentation(i, 0.5);
+    //BRONZE CHALLENGE: save as a PNG
+    NSData *imageData = UIImagePNGRepresentation(i);
     [imageData writeToFile:[self pathForImageKey:s] atomically:YES];
 }
 
