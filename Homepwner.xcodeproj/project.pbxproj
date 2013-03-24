@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		506595BB16FEE378008CCEB1 /* BNRBaseTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 506595BA16FEE378008CCEB1 /* BNRBaseTableViewCell.m */; };
 		50A1D18F16E2E0C10006201A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50A1D18E16E2E0C10006201A /* UIKit.framework */; };
 		50A1D19116E2E0C10006201A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50A1D19016E2E0C10006201A /* Foundation.framework */; };
 		50A1D19316E2E0C10006201A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50A1D19216E2E0C10006201A /* CoreGraphics.framework */; };
@@ -30,6 +31,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		506595B916FEE378008CCEB1 /* BNRBaseTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BNRBaseTableViewCell.h; sourceTree = "<group>"; };
+		506595BA16FEE378008CCEB1 /* BNRBaseTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BNRBaseTableViewCell.m; sourceTree = "<group>"; };
 		50A1D18B16E2E0C10006201A /* Homepwner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homepwner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		50A1D18E16E2E0C10006201A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		50A1D19016E2E0C10006201A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -161,11 +164,13 @@
 		50B192A616FED45F00F198A6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				506595B916FEE378008CCEB1 /* BNRBaseTableViewCell.h */,
+				506595BA16FEE378008CCEB1 /* BNRBaseTableViewCell.m */,
+				50AC9AF616ECEA9B0072922F /* CameraOverlayView.h */,
+				50AC9AF716ECEA9B0072922F /* CameraOverlayView.m */,
 				50B1929A16FEA65B00F198A6 /* HomepwnerItemCell.h */,
 				50B1929B16FEA65B00F198A6 /* HomepwnerItemCell.m */,
 				50B1929D16FEA6A900F198A6 /* HomepwnerItemCell.xib */,
-				50AC9AF616ECEA9B0072922F /* CameraOverlayView.h */,
-				50AC9AF716ECEA9B0072922F /* CameraOverlayView.m */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -259,6 +264,7 @@
 				50AC9AF816ECEA9B0072922F /* CameraOverlayView.m in Sources */,
 				50B1929C16FEA65B00F198A6 /* HomepwnerItemCell.m in Sources */,
 				50B192A216FEC4F100F198A6 /* ImageViewController.m in Sources */,
+				506595BB16FEE378008CCEB1 /* BNRBaseTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

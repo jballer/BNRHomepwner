@@ -77,8 +77,6 @@
             NSLog(@"Error: unable to find %@", [self pathForImageKey:key]);
         }
     }
-    
-    NSLog(@"ImageStore image size: %f x %f", [result size].width, [result size].height);
     return result;
 }
 

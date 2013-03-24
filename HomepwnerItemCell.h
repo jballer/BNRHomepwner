@@ -7,17 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "BNRBaseTableViewCell.h"
 
-@interface HomepwnerItemCell : UITableViewCell
+@interface HomepwnerItemCell : BNRBaseTableViewCell
 
 @property (weak, nonatomic) IBOutlet UIImageView *thumbnailView;
 @property (weak, nonatomic) IBOutlet UILabel *nameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *serialNumberLabel;
 @property (weak, nonatomic) IBOutlet UILabel *valueLabel;
-
-// These have to be weak so we avoid a retain loop
-@property (weak, nonatomic) id controller;
-@property (weak, nonatomic) UITableView *tableView;
 
 - (IBAction)showImage:(id)sender;
 

@@ -79,11 +79,11 @@
 
 - (void)showImage:(id)sender atIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"going to show image for %@", indexPath);
+//  My initial guess:
 //    UIViewController *ivc = [[UIViewController alloc] init];
 //    [self presentViewController:ivc
 //                       animated:YES
-//                     completion:<#^(void)completion#>]
+//                     completion:…]
     
     // Use a popover if this is on an iPad
     if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
@@ -98,7 +98,6 @@
         
         // Make a rect of the button relative to this view
         CGRect rect = [[self view] convertRect:[sender bounds] fromView:sender];
-        NSLog(@"sender: %@", sender);
         
         // Make a new ImageViewController and set its image
         ImageViewController *ivc = [[ImageViewController alloc] init];
@@ -118,11 +117,7 @@
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
-    NSLog(@"Popover properties…\r");
     ImageViewController *ivc = (ImageViewController *)[popoverController contentViewController];
-    
-    NSLog(@"ScrollView content size: %f x %f", [[ivc scrollView] contentSize].width, [[ivc scrollView] contentSize].height);
-    NSLog(@"ImageView image size: %f x %f", [[ivc image] size].width, [[ivc image] size].height);
     [imagePopover dismissPopoverAnimated:YES];
     imagePopover = nil;
 }

@@ -43,21 +43,16 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
+    // This log helped me diagnose that AutoLayout was setting the scrollView's contentSize to 600x600
+//    NSLog(@"ImageView image size: %f x %f", [[self image] size].width, [[self image] size].height);
     CGSize sz = [[self image] size];
-    NSLog(@"ImageView image size: %f x %f", [[self image] size].width, [[self image] size].height);
     [scrollView setContentSize:sz];
     [imageView setFrame:CGRectMake(0, 0, sz.width, sz.height)];
     [imageView setImage:[self image]];
-}
-
-- (void)scrollViewDidScroll:(UIScrollView *)sv
-{
-    NSLog(@"ScrollView Scrolled…\rContent size: %f x %f", [sv contentSize].width, [sv contentSize].height);
-    NSLog(@"…ImageView frame: %f x %f", [imageView frame].size.width, [imageView frame].size.height);
 }
 
 @end

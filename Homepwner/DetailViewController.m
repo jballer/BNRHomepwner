@@ -284,7 +284,7 @@ UIActionSheet *imageRemoveConfirmSheet;
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
-    NSLog(@"User dismissed popover %@", popoverController);
+//    NSLog(@"User dismissed popover %@", popoverController);
     imagePickerPopover = nil;
 }
 

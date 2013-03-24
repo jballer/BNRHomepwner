@@ -7,6 +7,7 @@
 //
 
 #import "HomepwnerItemCell.h"
+#import <objc/message.h>
 
 @implementation HomepwnerItemCell
 
@@ -15,23 +16,12 @@
 @synthesize controller, tableView;
 
 - (IBAction)showImage:(id)sender {
-    NSIndexPath *indexPath = [[self tableView] indexPathForCell:self];
 //  Can't do the following without being dependent on the controller's class implementing showImage:atIndexPath:
 //
 //    [[self controller] showImage:sender
 //                     atIndexPath:indexPath];
     
 //  So instead we use selector at runtime
-    NSString *selector = NSStringFromSelector(_cmd);
-    selector = [selector stringByAppendingString:@"atIndexPath:"];
-    
-    // Make a new selector
-    SEL newSelector = NSSelectorFromString(selector);
-    
-    if (indexPath && [[self controller] respondsToSelector:newSelector]) {
-        [[self controller] performSelector:newSelector
-                                withObject:sender
-                                withObject:indexPath];
-    }
+    ROUTE(sender);
 }
 @end
