@@ -85,23 +85,23 @@
 //                       animated:YES
 //                     completion:…]
     
+    // get the item for the indexpath
+    BNRItem *item = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+    
+    UIImage *img = [[BNRImageStore sharedStore] imageForKey:[item imageKey]];
+    
+    if (!img)
+        return;
+
+    // Make a new ImageViewController and set its image
+    ImageViewController *ivc = [[ImageViewController alloc] init];
+    [ivc setImage:img];
+    
     // Use a popover if this is on an iPad
     if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
     {
-        // get the item for the indexpath
-        BNRItem *item = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
-        
-        UIImage *img = [[BNRImageStore sharedStore] imageForKey:[item imageKey]];
-        
-        if (!img)
-            return;
-        
         // Make a rect of the button relative to this view
         CGRect rect = [[self view] convertRect:[sender bounds] fromView:sender];
-        
-        // Make a new ImageViewController and set its image
-        ImageViewController *ivc = [[ImageViewController alloc] init];
-        [ivc setImage:img];
         
         // Present a 600x600 popover from the rect
         imagePopover = [[UIPopoverController alloc] initWithContentViewController:ivc];
@@ -111,8 +111,20 @@
                                       inView:[self view]
                     permittedArrowDirections:UIPopoverArrowDirectionAny
                                     animated:YES];
-        
     }
+    else
+    {
+        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissModalViewController:)];
+        UINavigationController *nav = [[UINavigationController alloc] init];
+        [nav setViewControllers:[NSArray arrayWithObject:ivc]];
+        [[ivc navigationItem] setRightBarButtonItem:doneButton];
+        [self presentViewController:nav animated:YES completion:nil];
+    }
+}
+
+- (void)dismissModalViewController:(UIViewController *)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController

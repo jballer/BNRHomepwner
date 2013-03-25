@@ -67,17 +67,18 @@
     CGFloat zoomScale = MIN(scrollViewSize.width / contentSize.width, scrollViewSize.height / contentSize.height);
     zoomScale = MIN(1.0, zoomScale); // Don't fit to rect if it's a tiny image
     
-    // Set the content size to the image size
-    [scrollView setContentSize:contentSize];
-
-    // Center the image (though this is currently obviated by setZoomScale below)
-    [self centerContentForScrollView:scrollView];
     [scrollView setMinimumZoomScale:zoomScale];
     [scrollView setMaximumZoomScale:10];
     
+    // Set the content size to the image size
+    [scrollView setContentSize:contentSize];
+    
     // Size the image to fit
     // Have to do this after setting the image.
-    [scrollView setZoomScale:1.0];
+    [scrollView setZoomScale:zoomScale];
+    
+    // Center the image (though this is currently obviated by setZoomScale below)
+    [self centerContentForScrollView:scrollView];
 
 }
 
