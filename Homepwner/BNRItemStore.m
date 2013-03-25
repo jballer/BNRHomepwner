@@ -82,6 +82,45 @@
     return [documentDirectory stringByAppendingPathComponent:@"store.data"];
 }
 
+- (NSArray *)allAssetTypes
+{
+    if (!allAssetTypes) {
+        NSFetchRequest *request = [[NSFetchRequest alloc] init];
+        
+        NSEntityDescription *description = [[model entitiesByName] objectForKey:@"BNRAssetType"];
+        
+        [request setEntity:description];
+        
+        NSError *err;
+        NSArray *result = [context executeFetchRequest:request error:&err];
+        
+        if (!result) {
+            [NSException raise:@"Fetch failed" format:@"Reason: ", [err localizedDescription]];
+        }
+        
+        allAssetTypes = [result mutableCopy];
+    }
+    
+    // First run? Set up the array with some defaults
+    if ([allAssetTypes count] == 0) {
+        [self addAssetType:@"Furniture"];
+        [self addAssetType:@"Jewelry"];
+        [self addAssetType:@"Electronics"];
+    }
+    
+    return allAssetTypes;
+}
+
+- (void)addAssetType:(NSString *)label
+{
+    NSManagedObject *assetType;
+    
+    assetType = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
+                                              inManagedObjectContext:context];
+    [assetType setValue:label forKey:@"label"];
+    [allAssetTypes addObject:assetType];
+}
+
 - (void)loadAllItems
 {
     if (!allItems)

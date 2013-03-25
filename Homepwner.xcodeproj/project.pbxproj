@@ -30,6 +30,7 @@
 		50D38C1316FFEB1A00F40344 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50D38C1216FFEB1A00F40344 /* CoreData.framework */; };
 		50D38C1616FFEB4900F40344 /* Homepwner.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 50D38C1416FFEB4900F40344 /* Homepwner.xcdatamodeld */; };
 		50D38C191700CD2B00F40344 /* BNRItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 50D38C181700CD2B00F40344 /* BNRItem.m */; };
+		50D38C1F1700DD8A00F40344 /* AssetTypePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 50D38C1E1700DD8900F40344 /* AssetTypePicker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -69,6 +70,8 @@
 		50D38C1516FFEB4900F40344 /* Homepwner.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Homepwner.xcdatamodel; sourceTree = "<group>"; };
 		50D38C171700CD2B00F40344 /* BNRItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BNRItem.h; path = ../BNRItem.h; sourceTree = "<group>"; };
 		50D38C181700CD2B00F40344 /* BNRItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BNRItem.m; path = ../BNRItem.m; sourceTree = "<group>"; };
+		50D38C1D1700DD8900F40344 /* AssetTypePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetTypePicker.h; path = ../AssetTypePicker.h; sourceTree = "<group>"; };
+		50D38C1E1700DD8900F40344 /* AssetTypePicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AssetTypePicker.m; path = ../AssetTypePicker.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +158,8 @@
 		50B192A516FED44B00F198A6 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				50D38C1D1700DD8900F40344 /* AssetTypePicker.h */,
+				50D38C1E1700DD8900F40344 /* AssetTypePicker.m */,
 				50B1929F16FEC4F100F198A6 /* ImageViewController.h */,
 				50B192A016FEC4F100F198A6 /* ImageViewController.m */,
 				50B192A116FEC4F100F198A6 /* ImageViewController.xib */,
@@ -273,6 +278,7 @@
 				506595BB16FEE378008CCEB1 /* BNRBaseTableViewCell.m in Sources */,
 				50D38C1616FFEB4900F40344 /* Homepwner.xcdatamodeld in Sources */,
 				50D38C191700CD2B00F40344 /* BNRItem.m in Sources */,
+				50D38C1F1700DD8A00F40344 /* AssetTypePicker.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,6 +15,7 @@
 {
     NSMutableArray *allItems;
     
+// Chapter 16 - CoreData
     NSMutableArray *allAssetTypes;
     NSManagedObjectContext *context;
     NSManagedObjectModel *model;
@@ -22,7 +23,9 @@
 
 + (BNRItemStore *)sharedStore;
 
+// Chapter 16
 - (void)loadAllItems;
+- (NSArray *)allAssetTypes;
 
 - (NSString *)itemArchivePath;
 - (NSArray *)allItems;
