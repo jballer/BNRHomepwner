@@ -146,6 +146,16 @@ UIActionSheet *imageRemoveConfirmSheet;
     }
 }
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    if ([item imageKey]){
+        [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
+    }
+    else {
+        [imageView setImage:nil];
+    }
+}
+
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];

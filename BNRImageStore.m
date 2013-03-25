@@ -55,7 +55,19 @@
 {
     // BRONZE CHALLENGE: save as a PNG
     // This apparently lost orientation data, but redrawing gets it right
-    UIGraphicsBeginImageContextWithOptions([i size], NO, 0.0);
+
+    // Might as well downsize it
+    CGAffineTransform transform = CGAffineTransformIdentity;
+    CGSize maxSize = CGSizeMake(1600, 1600);
+    CGFloat scale = 1.0f;
+    if ([i size].width > maxSize.width || [i size].height > maxSize.height)
+    {
+        // Scale it down to a max of 2048
+        scale = MIN(maxSize.height / [i size].height, maxSize.width / [i size].width);
+//        transform = CGAffineTransformMakeScale(scale, scale);
+    }
+    UIGraphicsBeginImageContextWithOptions(CGSizeApplyAffineTransform([i size], transform), NO, scale);
+//    CGContextConcatCTM(UIGraphicsGetCurrentContext(), transform);
     [i drawAtPoint:CGPointZero];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();

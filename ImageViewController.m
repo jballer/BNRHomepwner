@@ -65,19 +65,19 @@
 
     // Find the zoom scale that will fit the whole image
     CGFloat zoomScale = MIN(scrollViewSize.width / contentSize.width, scrollViewSize.height / contentSize.height);
+    zoomScale = MIN(1.0, zoomScale); // Don't fit to rect if it's a tiny image
     
     // Set the content size to the image size
     [scrollView setContentSize:contentSize];
 
     // Center the image (though this is currently obviated by setZoomScale below)
-//    [scrollView setContentOffset:CGPointMake(contentSize.width/2 - scrollViewSize.width/2,
-//                                             contentSize.height/2 - scrollViewSize.height/2)];
+    [self centerContentForScrollView:scrollView];
     [scrollView setMinimumZoomScale:zoomScale];
     [scrollView setMaximumZoomScale:10];
     
     // Size the image to fit
     // Have to do this after setting the image.
-    [scrollView setZoomScale:zoomScale];
+    [scrollView setZoomScale:1.0];
 
 }
 
@@ -86,16 +86,10 @@
     return imageView;
 }
 
-- (void)scrollViewDidZoom:(UIScrollView *)sv
+- (void)centerContentForScrollView:(UIScrollView *)sv
 {
     CGSize contentSize = [scrollView contentSize];
     CGSize scrollViewSize = [sv bounds].size;
-    
-    LOGRECT([sv frame], @"scrollView Frame");
-    LOGRECT([sv bounds], @"scrollView Bounds");
-    LOGSIZE([scrollView contentSize], @"contentSize");
-    LOGPOINT([scrollView contentOffset], @"contentOffset");
-    
     UIEdgeInsets insets = UIEdgeInsetsZero;
     
     if (scrollViewSize.width > contentSize.width) {
@@ -107,6 +101,16 @@
     }
     
     [scrollView setContentInset:insets];
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)sv
+{
+//    LOGRECT([sv frame], @"scrollView Frame");
+//    LOGRECT([sv bounds], @"scrollView Bounds");
+//    LOGSIZE([scrollView contentSize], @"contentSize");
+//    LOGPOINT([scrollView contentOffset], @"contentOffset");
+
+    [self centerContentForScrollView:sv];
 }
 
 - (void)scrollViewDidEndZooming:(UIScrollView *)sv withView:(UIView *)view atScale:(float)scale
