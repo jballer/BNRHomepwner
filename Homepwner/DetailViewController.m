@@ -117,7 +117,8 @@ UIActionSheet *imageRemoveConfirmSheet;
     [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
     [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
 
-    [dateLabel setText:[dateFormatter stringFromDate:[item dateCreated]]];
+    [dateLabel setText:[dateFormatter stringFromDate:
+                        [NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]]]];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -132,7 +133,7 @@ UIActionSheet *imageRemoveConfirmSheet;
     [serialNumberField setText:[item serialNumber]];
     [valueField setText:[NSString stringWithFormat:@"%d",[item valueInDollars]]];
     [self updateDateLabel];
-    [datePickerView setDate:[item dateCreated] animated:NO];
+    [datePickerView setDate:[NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]] animated:NO];
     
     // BRONZE CHALLENGE: use number keyboard for value field
     [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
@@ -239,7 +240,7 @@ UIActionSheet *imageRemoveConfirmSheet;
 
 - (void)saveNewDate
 {
-    [item setDateCreated:[datePickerView date]];
+    [item setDateCreated:[[datePickerView date] timeIntervalSinceReferenceDate]];
     [self updateDateLabel];
     [dateChanger resignFirstResponder];
 }

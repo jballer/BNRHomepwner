@@ -268,7 +268,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath
       toIndexPath:(NSIndexPath *)destinationIndexPath
 {
-    [[BNRItemStore sharedStore] moveItemFrom:[sourceIndexPath row] to:[destinationIndexPath row]];
+    [[BNRItemStore sharedStore] moveItemFromIndex:[sourceIndexPath row] toIndex:[destinationIndexPath row]];
 }
 
 @end

@@ -30,14 +30,43 @@
 {
     self = [super init];
     if (self) {
-        // Restore the items from the archive, if possible
-        NSString *path = [self itemArchivePath];
-        allItems = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+//        // Restore the items from the archive, if possible
+//        NSString *path = [self itemArchivePath];
+//        allItems = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+//        
+//        // If not restored, make a new array
+//        if (!allItems) {
+//            allItems = [[NSMutableArray alloc] init];
+//        }
         
-        // If not restored, make a new array
-        if (!allItems) {
-            allItems = [[NSMutableArray alloc] init];
+        // Read in the Core Data model
+        model = [NSManagedObjectModel mergedModelFromBundles:nil];
+        
+        NSPersistentStoreCoordinator *psc = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+        
+        // Store the SQLite file
+        NSURL *storeURL = [NSURL fileURLWithPath:[self itemArchivePath]];
+        
+        NSError *err = nil;
+        
+        if (![psc addPersistentStoreWithType:NSSQLiteStoreType
+                               configuration:nil
+                                         URL:storeURL
+                                     options:nil
+                                       error:&err])
+        {
+            [NSException raise:@"Open Failed"
+                        format:@"Reason: %@", [err localizedDescription]];
         }
+        
+        // Create managed object context
+        context = [[NSManagedObjectContext alloc] init];
+        [context setPersistentStoreCoordinator:psc];
+        
+        // We aren't using undo support here
+        [context setUndoManager:nil];
+        
+        [self loadAllItems];
     }
     return self;
 }
@@ -50,7 +79,41 @@
     // There's only one directory in this list…
     NSString *documentDirectory = [documentDirectories objectAtIndex:0];
     
-    return [documentDirectory stringByAppendingPathComponent:@"items.archive"];
+    return [documentDirectory stringByAppendingPathComponent:@"store.data"];
+}
+
+- (void)loadAllItems
+{
+    if (!allItems)
+    {
+        NSFetchRequest *request = [[NSFetchRequest alloc] init];
+        
+        NSEntityDescription *entity = [[model entitiesByName] objectForKey:@"BNRItem"];
+        [request setEntity:entity];
+        
+        NSSortDescriptor *descriptor = [NSSortDescriptor sortDescriptorWithKey:@"orderingValue"
+                                                                      ascending:YES];
+        
+        // To selectively fetch, add a predicate. SEE Apple's Predicate Programming Guide
+        // For example,
+//        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"valueInDollars > 50"];
+//        [request setPredicate:predicate];
+        
+        [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+        
+        NSError *err;
+        NSArray *result = [context executeFetchRequest:request error:&err];
+        
+        if (!result) {
+            [NSException raise:@"Fetch failed"
+                        format:@"Reason: %@", [err localizedDescription]];
+        }
+        
+        allItems = [[NSMutableArray alloc] initWithArray:result];
+        
+        // Predicate can also be used to filter an array
+        // NSArray *expensiveStuff = [allItems filterUsingPredicate:predicate];
+    }
 }
 
 - (NSArray *)allItems
@@ -60,8 +123,22 @@
 
 - (BNRItem *)createItem
 {
-    BNRItem *newItem = [[BNRItem alloc] init];
+    // Increment the order of the new item based on the last item
+    double order;
+    if ([allItems count] == 0) {
+        order = 1.0;
+    }
+    else {
+        order = [[allItems lastObject] orderingValue] + 1.0;
+    }
+    NSLog(@"Adding item after %d items, order = %.2f", [allItems count], order);
+    
+    BNRItem *newItem = [NSEntityDescription insertNewObjectForEntityForName:@"BNRItem"
+                                               inManagedObjectContext:context];
+    [newItem setOrderingValue:order];
+    
     [allItems addObject:newItem];
+    
     return newItem;
 }
 
@@ -71,21 +148,58 @@
     {
         [[BNRImageStore sharedStore] deleteImageForKey:[p imageKey]];
     }
+    [context deleteObject:p];
     [allItems removeObjectIdenticalTo:p]; // This goes by pointer instead of isEqual.
 }
 
-- (void)moveItemFrom:(int)index to:(int)newIndex
+- (void)moveItemFromIndex:(int)from
+                  toIndex:(int)to
 {
-    BNRItem *item = [allItems objectAtIndex:index];
-    [allItems removeObjectAtIndex:index];
-    [allItems insertObject:item atIndex:newIndex];
+    if (from == to) {
+        return;
+    }
+    BNRItem *item = [allItems objectAtIndex:from];
+    [allItems removeObjectAtIndex:from];
+    [allItems insertObject:item atIndex:to];
+    
+    // Get the new orderValue for database sorting
+
+    // Is there an object before it?
+        double lowerBound = 0.0;
+        if (to > 0) {
+            lowerBound = [[allItems objectAtIndex:(to - 1)] orderingValue];
+        }
+        else {
+            lowerBound = [[allItems objectAtIndex:1] orderingValue] - 2.0;
+        }
+
+    // Is there an object after it?
+        double upperBound = 0.0;
+        if (to < [allItems count] - 1) {
+            upperBound = [[allItems objectAtIndex:(to + 1)] orderingValue];
+        }
+        else {
+            upperBound = [[allItems objectAtIndex:(to - 1)] orderingValue] + 2.0;
+        }
+    
+    double newOrderValue = (lowerBound + upperBound) / 2.0;
+    
+    NSLog(@"moving to order %f", newOrderValue);
+    [item setOrderingValue:newOrderValue];
 }
 
-- (BOOL)saveChanges
+- (BOOL)saveChanges // Called by app delegate when app goes into background
 {
-    NSString *path = [self itemArchivePath];
+//    return [NSKeyedArchiver archiveRootObject:allItems
+//                                       toFile:[self itemArchivePath]];
     
-    return [NSKeyedArchiver archiveRootObject:allItems toFile:path];
+    NSError *err = nil;
+    BOOL successful = [context save:&err];
+    
+    if (!successful) {
+        NSLog(@"Error saving: %@", [err localizedDescription]);
+    }
+    return successful;
 }
 
 @end
