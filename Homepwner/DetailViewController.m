@@ -342,8 +342,10 @@ UIActionSheet *imageRemoveConfirmSheet;
     // BRONZE CHALLENGE: use edited image if available
     //TODO: figure out why Edited Image comes out at very low resolution
 //    if (!(image = [info objectForKey:UIImagePickerControllerEditedImage])) {
-        image = [info objectForKey:UIImagePickerControllerOriginalImage];
+//
 //    }
+    
+    image = [info objectForKey:UIImagePickerControllerOriginalImage];
     
     [item setThumbnailDataFromImage:image];
     

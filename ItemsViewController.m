@@ -117,7 +117,6 @@
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
-    ImageViewController *ivc = (ImageViewController *)[popoverController contentViewController];
     [imagePopover dismissPopoverAnimated:YES];
     imagePopover = nil;
 }
@@ -223,6 +222,16 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         
         return cell;
     }
+}
+
+- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView
+           editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Don't allow editing for the last row
+    if ([indexPath row] >= [[self tableView] numberOfRowsInSection:[indexPath section]] - 1)
+        return UITableViewCellEditingStyleNone;
+    else
+        return UITableViewCellEditingStyleDelete;
 }
 
 // Delete object when deleted by user in Edit mode

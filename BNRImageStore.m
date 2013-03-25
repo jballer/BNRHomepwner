@@ -53,11 +53,17 @@
 
 - (void)setImage:(UIImage *)i forKey:(NSString *)s
 {
-    [dictionary setObject:i forKey:s];
+    // BRONZE CHALLENGE: save as a PNG
+    // This apparently lost orientation data, but redrawing gets it right
+    UIGraphicsBeginImageContextWithOptions([i size], NO, 0.0);
+    [i drawAtPoint:CGPointZero];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    [dictionary setObject:image forKey:s];
     
-    //BRONZE CHALLENGE: save as a PNG
-    NSData *imageData = UIImagePNGRepresentation(i);
 //    NSData *imageData = UIImageJPEGRepresentation(i, 0.8);
+    NSData *imageData = UIImagePNGRepresentation(image);
     [imageData writeToFile:[self pathForImageKey:s] atomically:YES];
 }
 
