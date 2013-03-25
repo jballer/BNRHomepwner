@@ -6,11 +6,12 @@
 //  Copyright (c) 2013 jballer. All rights reserved.
 //
 
-#import "DetailViewController.h"
+#import "AssetTypePicker.h"
 #import "BNRItem.h"
 #import "BNRItemStore.h"
 #import "BNRImageStore.h"
 #import "CameraOverlayView.h"
+#import "DetailViewController.h"
 
 @interface DetailViewController ()
 
@@ -114,8 +115,8 @@ UIActionSheet *imageRemoveConfirmSheet;
 - (void)updateDateLabel
 {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
-    [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+    [dateFormatter setDateStyle:NSDateFormatterShortStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
 
     [dateLabel setText:[dateFormatter stringFromDate:
                         [NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]]]];
@@ -134,21 +135,17 @@ UIActionSheet *imageRemoveConfirmSheet;
     [valueField setText:[NSString stringWithFormat:@"%d",[item valueInDollars]]];
     [self updateDateLabel];
     [datePickerView setDate:[NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]] animated:NO];
+    [self updateAssetTypeButtonLabel];
     
     // BRONZE CHALLENGE: use number keyboard for value field
     [valueField setKeyboardType:UIKeyboardTypeDecimalPad];
     
-    // Get the image ID
-    if ([item imageKey]){
-        [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
-    }
-    else {
-        [imageView setImage:nil];
-    }
+    [self updateImage];
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)updateImage
 {
+    // Get the image ID
     if ([item imageKey]){
         [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
     }
@@ -296,7 +293,22 @@ UIActionSheet *imageRemoveConfirmSheet;
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
 //    NSLog(@"User dismissed popover %@", popoverController);
-    imagePickerPopover = nil;
+    if (popoverController == imagePickerPopover){
+        imagePickerPopover = nil;
+        NSLog(@"got here (image)");
+    }
+    if (popoverController == assetTypePickerPopover) {
+        assetTypePickerPopover = nil;
+        [self updateAssetTypeButtonLabel];
+        NSLog(@"got here (asset)");
+    }
+}
+
+- (void) updateAssetTypeButtonLabel
+{
+    NSString *label = [[item assetType] valueForKey:@"label"];
+    [assetTypeButton setTitle:[NSString stringWithFormat:@"Type: %@",label ? label : @"(none)"]
+                     forState:UIControlStateNormal];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -305,7 +317,8 @@ UIActionSheet *imageRemoveConfirmSheet;
     [super touchesEnded:touches withEvent:event];
 }
 
-- (IBAction)removePicture:(id)sender {
+- (IBAction)removePicture:(id)sender
+{
     if ([item imageKey] == nil) {
         return;
     }
@@ -316,6 +329,33 @@ UIActionSheet *imageRemoveConfirmSheet;
                                               destructiveButtonTitle:@"Remove Image"
                                                    otherButtonTitles:nil];
     [imageRemoveConfirmSheet showInView:[self view]];
+}
+
+- (IBAction)showAssetTypePicker:(id)sender
+{
+    if ([assetTypePickerPopover isPopoverVisible])
+    {
+        [assetTypePickerPopover dismissPopoverAnimated:YES];
+        assetTypePickerPopover = nil;
+        return;
+    }
+
+    [[self view] endEditing:YES];
+    
+    AssetTypePicker *picker = [[AssetTypePicker alloc] init];
+    [picker setItem:item];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        // Popover
+        assetTypePickerPopover = [[UIPopoverController alloc] initWithContentViewController:picker];
+        [picker setPopoverController:assetTypePickerPopover];
+        
+        [assetTypePickerPopover presentPopoverFromRect:[sender frame] inView:[self view] permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+    }
+    else // Modal view controller
+    {
+        [[self navigationController] pushViewController:picker animated:YES];
+    }
 }
 
 - (void)removePictureAfterUserConfirmed
@@ -379,6 +419,8 @@ UIActionSheet *imageRemoveConfirmSheet;
     CFRelease(newUniqueID);
     
     // Use the image in the imageView
+    [imageView setImage:image];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         [imagePickerPopover dismissPopoverAnimated:YES];
         imagePickerPopover = nil;

@@ -14,4 +14,6 @@
 
 @property (nonatomic, strong) BNRItem *item;
 
+@property (nonatomic, weak) UIPopoverController *popoverController;
+
 @end

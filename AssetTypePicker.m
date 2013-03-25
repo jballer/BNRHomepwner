@@ -12,7 +12,7 @@
 
 @implementation AssetTypePicker
 
-@synthesize item;
+@synthesize item, popoverController;
 
 - (id)init
 {
@@ -51,11 +51,17 @@
     else {
         [cell setAccessoryType:UITableViewCellAccessoryNone];
     }
-    
+
     return cell;
 }
 
-- (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGSize)contentSizeForViewInPopover
+{
+    CGFloat height = 44 * ([[[BNRItemStore sharedStore] allAssetTypes] count] + 1);
+    return CGSizeMake(320, MIN(height, 720));
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
@@ -66,7 +72,12 @@
     
     [item setAssetType:assetType];
     
-    [[self navigationController] popViewControllerAnimated:YES];
+    if (popoverController) {
+        [popoverController dismissPopoverAnimated:YES];
+    }
+    else {
+        [[self navigationController] popViewControllerAnimated:YES];
+    }
 }
 
 @end

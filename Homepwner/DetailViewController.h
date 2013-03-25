@@ -18,7 +18,10 @@
     __weak IBOutlet UIImageView *imageView;
     __weak IBOutlet UIButton *changeDateButton;
     
+    __weak IBOutlet UIButton *assetTypeButton;
+    
     UIPopoverController *imagePickerPopover;
+    UIPopoverController *assetTypePickerPopover;
 }
 @property (nonatomic, strong) BNRItem *item;
 @property (nonatomic, copy) void (^dismissBlock)(void);
@@ -29,4 +32,5 @@
 - (IBAction)takePicture:(id)sender;
 - (IBAction)removePicture:(id)sender;
 
+- (IBAction)showAssetTypePicker:(id)sender;
 @end

@@ -271,4 +271,23 @@ moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath
     [[BNRItemStore sharedStore] moveItemFromIndex:[sourceIndexPath row] toIndex:[destinationIndexPath row]];
 }
 
+- (BOOL)shouldAutorotate
+{
+    NSLog(@"WHEN IS THIS CALLED?")
+    return YES;
+}
+
+- (NSUInteger) supportedInterfaceOrientations
+{
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+    {
+        NSLog(@"RIGHT?!?!?!");
+        return UIInterfaceOrientationMaskAll;
+    }
+    else
+    {
+        return UIInterfaceOrientationMaskPortrait;
+    }
+}
+
 @end

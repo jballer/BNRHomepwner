@@ -95,7 +95,7 @@
         NSArray *result = [context executeFetchRequest:request error:&err];
         
         if (!result) {
-            [NSException raise:@"Fetch failed" format:@"Reason: ", [err localizedDescription]];
+            [NSException raise:@"Fetch failed" format:@"Reason: %@", [err localizedDescription]];
         }
         
         allAssetTypes = [result mutableCopy];
