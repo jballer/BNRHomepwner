@@ -113,12 +113,23 @@
 
 - (void)addAssetType:(NSString *)label
 {
+    for (NSManagedObject *assetType in allAssetTypes) {
+        if ([assetType valueForKey:@"label"] == label){
+            NSLog(@"There's already an asset type by that name");
+        }
+    }
     NSManagedObject *assetType;
     
     assetType = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
                                               inManagedObjectContext:context];
     [assetType setValue:label forKey:@"label"];
     [allAssetTypes addObject:assetType];
+}
+
+- (void)removeAssetType:(NSManagedObject *)assetType
+{
+    [context deleteObject:assetType];
+    [allAssetTypes removeObjectIdenticalTo:assetType];
 }
 
 - (void)loadAllItems

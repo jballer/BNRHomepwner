@@ -27,6 +27,8 @@
 - (void)loadAllItems;
 - (NSArray *)allAssetTypes;
 
+- (void)addAssetType:(NSString *)label;
+
 - (NSString *)itemArchivePath;
 - (NSArray *)allItems;
 - (BNRItem *)createItem;

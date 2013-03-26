@@ -10,10 +10,13 @@
 
 @class BNRItem;
 
-@interface AssetTypePicker : UITableViewController
+@interface AssetTypePicker : UITableViewController <UITextFieldDelegate>
+{
+    BOOL insertingNewAssetType;
+    UITextField *assetTypeInputField;
+}
 
 @property (nonatomic, strong) BNRItem *item;
-
 @property (nonatomic, weak) UIPopoverController *popoverController;
 
 @end

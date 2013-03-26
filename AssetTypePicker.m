@@ -16,7 +16,12 @@
 
 - (id)init
 {
-    return [super initWithStyle:UITableViewStyleGrouped];
+    self = [super initWithStyle:UITableViewStyleGrouped];
+    if (self) {
+        [[self navigationItem] setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertAssetTypeInputField:)]];
+        insertingNewAssetType = NO;
+    }
+    return self;
 }
 
 - (id)initWithStyle:(UITableViewStyle)style
@@ -24,32 +29,89 @@
     return [self init];
 }
 
+- (void)insertAssetTypeInputField:(id)sender
+{
+    [[[self navigationItem] rightBarButtonItem] setEnabled:NO];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self tableView:[self tableView] numberOfRowsInSection:0] inSection:0];
+    
+    insertingNewAssetType = YES;
+    [[self tableView] insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+                            withRowAnimation:UITableViewRowAnimationMiddle];
+    [assetTypeInputField becomeFirstResponder];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    if (textField == assetTypeInputField) {
+        [assetTypeInputField resignFirstResponder];
+        
+        // Replace the cell in place
+        insertingNewAssetType = NO; // This "count" is offset by the new item
+        [[BNRItemStore sharedStore] addAssetType:[assetTypeInputField text]];
+        assetTypeInputField = nil;
+
+        [[self tableView] reloadData];
+        
+        [[[self navigationItem] rightBarButtonItem] setEnabled:YES];
+        return NO;
+    }
+    return YES;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[[BNRItemStore sharedStore] allAssetTypes] count];
+    NSInteger numberOfCells = [[[BNRItemStore sharedStore] allAssetTypes] count];
+    
+    return numberOfCells + (insertingNewAssetType ? 1 : 0);
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
-    
-    if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                      reuseIdentifier:@"UITableViewCell"];
-    }
-    
+    UITableViewCell *cell = nil;
     NSArray *allAssets = [[BNRItemStore sharedStore] allAssetTypes];
-    NSManagedObject *assetType = [allAssets objectAtIndex:[indexPath row]];
     
-    // Use key-value coding to get the assetType's label
-    [[cell textLabel] setText:[assetType valueForKey:@"label"]];
-    
-    // Put a checkmark next to the one that's selected
-    if (assetType == [item assetType]) {
-        [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
+    if (insertingNewAssetType && [indexPath row] == [allAssets count])
+    {   // This is the new input cell
+         cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCellWithInput"];
+        
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                          reuseIdentifier:@"UITableViewCellWithInput"];
+        }        
+        
+        CGRect frame = CGRectMake(10, 10, [cell bounds].size.width - 10, [cell bounds].size.height - 20);
+        
+        assetTypeInputField = [[UITextField alloc] initWithFrame:frame];
+        [assetTypeInputField setAdjustsFontSizeToFitWidth:YES];
+        [assetTypeInputField setMinimumFontSize:8.0];
+        [assetTypeInputField setPlaceholder:@"New Asset Type"];
+        [assetTypeInputField setDelegate:self];
+        [assetTypeInputField setReturnKeyType:UIReturnKeyDone];
+        
+        [[cell contentView] addSubview:assetTypeInputField];
     }
-    else {
-        [cell setAccessoryType:UITableViewCellAccessoryNone];
+    
+    else // This cell represents an item
+    {
+        cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+        
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                          reuseIdentifier:@"UITableViewCell"];
+        }
+
+        NSManagedObject *assetType = [allAssets objectAtIndex:[indexPath row]];
+        
+        // Use key-value coding to get the assetType's label
+        [[cell textLabel] setText:[assetType valueForKey:@"label"]];
+        
+        // Put a checkmark next to the one that's selected
+        if (assetType == [item assetType]) {
+            [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
+        }
+        else {
+            [cell setAccessoryType:UITableViewCellAccessoryNone];
+        }
     }
 
     return cell;
