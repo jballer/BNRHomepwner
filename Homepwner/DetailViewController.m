@@ -134,6 +134,7 @@ BOOL startInputOnLoad;
     // If this is a new item, bring up the keyboard
     if (startInputOnLoad) {
         [nameField becomeFirstResponder];
+        startInputOnLoad = NO;
     }
     
     // Load instance variable values
@@ -339,7 +340,7 @@ BOOL startInputOnLoad;
 - (void) updateAssetTypeButtonLabel
 {
     NSString *label = [[item assetType] valueForKey:@"label"];
-    [assetTypeButton setTitle:[NSString stringWithFormat:@"Type: %@",label ? label : @"(none)"]
+    [assetTypeButton setTitle:[NSString stringWithFormat:@"%@", label ? label : @"Set Asset Type"]
                      forState:UIControlStateNormal];
 }
 

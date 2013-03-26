@@ -12,7 +12,7 @@
 
 @interface AssetTypePicker : UITableViewController <UITextFieldDelegate>
 {
-    UITextField *assetTypeInputField;
+//    UITextField *assetTypeInputField;
 }
 
 @property (nonatomic, strong) BNRItem *item;
