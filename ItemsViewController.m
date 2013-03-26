@@ -180,6 +180,10 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         [detail setItem:[[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]]];
         [[self navigationController] pushViewController:detail animated:YES];
     }
+    else
+    {
+        [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    }
 }
 
 // =================

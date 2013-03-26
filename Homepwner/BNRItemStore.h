@@ -28,6 +28,7 @@
 - (NSArray *)allAssetTypes;
 
 - (void)addAssetType:(NSString *)label;
+- (void)removeAssetType:(NSManagedObject *)assetType;
 
 - (NSString *)itemArchivePath;
 - (NSArray *)allItems;

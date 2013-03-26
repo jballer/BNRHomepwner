@@ -26,6 +26,8 @@ UIAlertView *dateChangeWarning;
 
 UIActionSheet *imageRemoveConfirmSheet;
 
+BOOL startInputOnLoad;
+
 @synthesize item, dismissBlock;
 
 - (id)initForNewItem:(BOOL)isNew
@@ -40,6 +42,7 @@ UIActionSheet *imageRemoveConfirmSheet;
         [[self view] addSubview:dateChanger];
         
         if (isNew) {
+            startInputOnLoad = TRUE;
             UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                       target:self
                                                                                       action:@selector(save:)];
@@ -76,7 +79,6 @@ UIActionSheet *imageRemoveConfirmSheet;
     [[self presentingViewController] dismissViewControllerAnimated:YES
                                                         completion:dismissBlock];
 }
-
 
 - (void)setUpDateChanger
 {
@@ -128,6 +130,11 @@ UIActionSheet *imageRemoveConfirmSheet;
 
     // Clear the first responder
     [[self view] endEditing:YES];
+    
+    // If this is a new item, bring up the keyboard
+    if (startInputOnLoad) {
+        [nameField becomeFirstResponder];
+    }
     
     // Load instance variable values
     [nameField setText:[item itemName]];
@@ -206,7 +213,32 @@ UIActionSheet *imageRemoveConfirmSheet;
 {
     // SILVER CHALLENGE+: went ahead and set return to dismiss the other keyboards
     [textField resignFirstResponder];
+    
+    if (textField == nameField)
+    {
+        [serialNumberField becomeFirstResponder];
+    }
+    else if (textField == serialNumberField)
+    {
+        [valueField becomeFirstResponder];
+    }
+    
     return NO;
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    if (textField == valueField) {
+        if ([item valueInDollars] == 0) {
+            [valueField setText:@""];
+        }
+    }
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    
 }
 
 - (void)changeDate:(id)sender

@@ -114,8 +114,9 @@
 - (void)addAssetType:(NSString *)label
 {
     for (NSManagedObject *assetType in allAssetTypes) {
-        if ([assetType valueForKey:@"label"] == label){
+        if ([[assetType valueForKey:@"label"] lowercaseString] == [label lowercaseString]){
             NSLog(@"There's already an asset type by that name");
+            return;
         }
     }
     NSManagedObject *assetType;
@@ -124,6 +125,7 @@
                                               inManagedObjectContext:context];
     [assetType setValue:label forKey:@"label"];
     [allAssetTypes addObject:assetType];
+    
 }
 
 - (void)removeAssetType:(NSManagedObject *)assetType

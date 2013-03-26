@@ -12,11 +12,11 @@
 
 @interface AssetTypePicker : UITableViewController <UITextFieldDelegate>
 {
-    BOOL insertingNewAssetType;
     UITextField *assetTypeInputField;
 }
 
 @property (nonatomic, strong) BNRItem *item;
 @property (nonatomic, weak) UIPopoverController *popoverController;
+@property (nonatomic) BOOL insertingNewAssetType;
 
 @end
