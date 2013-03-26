@@ -175,7 +175,11 @@
     {
         HomepwnerItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"HomepwnerItemCell"];
         
-        BNRItem *currentItem = [[[BNRItemStore sharedStore] allItems] objectAtIndex:[indexPath row]];
+        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"valueInDollars" ascending:NO];
+        
+        NSArray *array = [[[item assetType] valueForKey:@"items"] sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+        
+        BNRItem *currentItem = [array objectAtIndex:[indexPath row]];
         
         [[cell nameLabel] setText:[currentItem itemName]];
         [[cell serialNumberLabel] setText:[currentItem serialNumber]];
@@ -200,6 +204,8 @@
 - (UITableViewCellEditingStyle) tableView:(UITableView *)tableView
             editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
+    NSLog(@"Items for Asset Type %@:\r%@", [assetType valueForKey:@"label"], [assetType valueForKey:@"items"]);
     if ([self insertingNewAssetType]) {
         // Don't allow delete while editing
         return UITableViewCellEditingStyleNone;
@@ -210,7 +216,7 @@
             // Don't allow editing for the input row
             return UITableViewCellEditingStyleNone;
         }
-        else if ([[tableView cellForRowAtIndexPath:indexPath] accessoryType] == UITableViewCellAccessoryCheckmark)
+        else if ([item assetType] == [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]])
         {
             // Don't allow editing for the selected row, this screws up the second section
             return UITableViewCellEditingStyleNone;
