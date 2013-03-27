@@ -16,17 +16,18 @@
 @synthesize item, popoverController;
 @synthesize insertingNewAssetType = _insertingNewAssetType;
 
-- (NSArray *)assetTypesSorted
-{
-    return [[[BNRItemStore sharedStore] allAssetTypes] sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"label" ascending:YES]]];
-}
+//- (NSArray *)assetTypesSorted
+//{
+//    return [[[BNRItemStore sharedStore] allAssetTypes] sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"label" ascending:YES]]];
+//}
 
 - (id)init
 {
     self = [super initWithStyle:UITableViewStyleGrouped];
     if (self) {
-        [[self navigationItem] setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertAssetTypeInputField:)]];
         [self setInsertingNewAssetType:NO];
+        [[self navigationItem] setTitle:@"Asset Type"];
+        [[self navigationItem] setRightBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertAssetTypeInputField:)]];
     }
     return self;
 }
@@ -92,15 +93,13 @@ titleForHeaderInSection:(NSInteger)section
         else
         {
             // Replace all of the cell in place if there's a new type
-            if ([[BNRItemStore sharedStore] addAssetType:[textField text]])
+            
+            int newIndex = [[BNRItemStore sharedStore] addAssetType:[textField text]];
+            
+            if (newIndex != NSUIntegerMax)
             {
-                int newIndex = [[self assetTypesSorted] indexOfObjectPassingTest:^(id obj, NSUInteger idx, BOOL *stop){
-                    BOOL found = ([[[obj valueForKey:@"label"] lowercaseString] isEqualToString:[[textField text] lowercaseString]]);
-                    return found;
-                }];
-                
-                NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0];
                 NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:newIndex inSection:0];
+                NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0];
 
                 [[self tableView] moveRowAtIndexPath:oldIndexPath toIndexPath:newIndexPath];
                 
@@ -165,7 +164,7 @@ titleForHeaderInSection:(NSInteger)section
 {
     if([indexPath section] == 0) {
 
-        NSArray *allAssets = [self assetTypesSorted];
+        NSArray *allAssets = [[BNRItemStore sharedStore] allAssetTypes];
         
         if ([self insertingNewAssetType] && [indexPath row] == [allAssets count])
         {   // This is the new input cell
@@ -222,8 +221,8 @@ titleForHeaderInSection:(NSInteger)section
         
         BNRItem *currentItem = [array objectAtIndex:[indexPath row]];
         
-        [[cell nameLabel] setText:[currentItem itemName]];
-        [[cell serialNumberLabel] setText:[currentItem serialNumber]];
+        [[cell textLabel] setText:[currentItem itemName]];
+        [[cell detailTextLabel] setText:[currentItem serialNumber]];
         [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
         
         [[cell thumbnailView] setImage:[currentItem thumbnail]];
@@ -245,7 +244,7 @@ titleForHeaderInSection:(NSInteger)section
 - (UITableViewCellEditingStyle) tableView:(UITableView *)tableView
             editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSManagedObject *assetType = [[self assetTypesSorted] objectAtIndex:[indexPath row]];
+    NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
     NSLog(@"Items for Asset Type %@:\r%@", [assetType valueForKey:@"label"], [assetType valueForKey:@"items"]);
     if ([self insertingNewAssetType]) {
         // Don't allow delete while editing
@@ -257,11 +256,11 @@ titleForHeaderInSection:(NSInteger)section
             // Don't allow editing for the input row
             return UITableViewCellEditingStyleNone;
         }
-        else if ([item assetType] == [[self assetTypesSorted] objectAtIndex:[indexPath row]])
-        {
-            // Don't allow editing for the selected row, this screws up the second section
-            return UITableViewCellEditingStyleNone;
-        }
+//        else if ([item assetType] == [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]])
+//        {
+//            // Don't allow editing for the selected row, this screws up the second section
+//            return UITableViewCellEditingStyleNone;
+//        }
         else
         {
             return UITableViewCellEditingStyleDelete;
@@ -277,9 +276,29 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 {
     if ([indexPath section] == 0 && ![self insertingNewAssetType]) {
         if (editingStyle == UITableViewCellEditingStyleDelete) {
-            [[BNRItemStore sharedStore] removeAssetType:[[self assetTypesSorted] objectAtIndex:[indexPath row]]];
-            [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-                                    withRowAnimation:UITableViewRowAnimationAutomatic];
+            
+            [[self tableView] beginUpdates];
+
+            // If this was the selected type, ditch the second section
+            if ([item assetType] == [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]]) {
+                [[self tableView] deleteSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationRight];
+            }
+            
+            // Removing will delete one row
+            // …BUT if it's the last asset type the count goes back up to 3!
+            int oldCount = [[[BNRItemStore sharedStore] allAssetTypes] count];
+            [[BNRItemStore sharedStore] removeAssetType:[[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]]];
+            if ([[[BNRItemStore sharedStore] allAssetTypes] count] == oldCount - 1) {
+                [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+                                        withRowAnimation:UITableViewRowAnimationAutomatic];
+            }
+            else
+            {
+                // Reload the whole section if that happened
+                [[self tableView] reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationLeft];
+            }
+            
+            [[self tableView] endUpdates];
         }
     }
 }
@@ -298,7 +317,7 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
         
         [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
         
-        NSManagedObject *assetType = [[self assetTypesSorted] objectAtIndex:[indexPath row]];
+        NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
         
         [item setAssetType:assetType];
         

@@ -85,20 +85,7 @@
 - (NSArray *)allAssetTypes
 {
     if (!allAssetTypes) {
-        NSFetchRequest *request = [[NSFetchRequest alloc] init];
-        
-        NSEntityDescription *description = [[model entitiesByName] objectForKey:@"BNRAssetType"];
-        
-        [request setEntity:description];
-        
-        NSError *err;
-        NSArray *result = [context executeFetchRequest:request error:&err];
-        
-        if (!result) {
-            [NSException raise:@"Fetch failed" format:@"Reason: %@", [err localizedDescription]];
-        }
-        
-        allAssetTypes = [result mutableCopy];
+        [self loadAllAssetTypes];
     }
     
     // First run? Set up the array with some defaults
@@ -111,8 +98,32 @@
     return allAssetTypes;
 }
 
-- (BOOL)addAssetType:(NSString *)label
+- (void)loadAllAssetTypes
 {
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    
+    NSEntityDescription *description = [[model entitiesByName] objectForKey:@"BNRAssetType"];
+    
+    [request setEntity:description];
+    
+    NSError *err;
+    NSArray *result = [context executeFetchRequest:request error:&err];
+    
+    if (!result) {
+        [NSException raise:@"Fetch failed" format:@"Reason: %@", [err localizedDescription]];
+    }
+    
+    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"label" ascending:YES
+                                                          comparator:^(id obj1, id obj2) {
+                                                              return [(NSString *)obj1 localizedCaseInsensitiveCompare:obj2];
+                                                          }];
+    
+    allAssetTypes = [result sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]];
+}
+
+- (int)addAssetType:(NSString *)label
+{
+    int index = NSUIntegerMax;
     for (NSManagedObject *assetType in allAssetTypes) {
         if ([[assetType valueForKey:@"label"] lowercaseString] == [label lowercaseString]){
             NSLog(@"There's already an asset type by that name");
@@ -123,15 +134,19 @@
     
     assetType = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
                                               inManagedObjectContext:context];
+    
     [assetType setValue:label forKey:@"label"];
-    [allAssetTypes addObject:assetType];
-    return true;
+    [self loadAllAssetTypes]; // refresh the cached array
+
+    index = [allAssetTypes indexOfObject:assetType];
+    
+    return index;
 }
 
 - (void)removeAssetType:(NSManagedObject *)assetType
 {
     [context deleteObject:assetType];
-    [allAssetTypes removeObjectIdenticalTo:assetType];
+    [self loadAllAssetTypes]; // refresh the cached array
 }
 
 - (void)loadAllItems

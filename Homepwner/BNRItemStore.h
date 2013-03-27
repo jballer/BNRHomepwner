@@ -16,7 +16,9 @@
     NSMutableArray *allItems;
     
 // Chapter 16 - CoreData
-    NSMutableArray *allAssetTypes;
+    // allAssetTypes is sorted by name (case-insensitive)
+    // It initializes an empty set with 3 default types.
+    NSArray *allAssetTypes;
     NSManagedObjectContext *context;
     NSManagedObjectModel *model;
 }
@@ -27,7 +29,11 @@
 - (void)loadAllItems;
 - (NSArray *)allAssetTypes;
 
-- (BOOL)addAssetType:(NSString *)label;
+// Returns the index of the new AssetType object
+- (int)addAssetType:(NSString *)label;
+
+// Removes the AssetType
+// NOTE: when removing the last object the allAssets reinitializes with 3 items!
 - (void)removeAssetType:(NSManagedObject *)assetType;
 
 - (NSString *)itemArchivePath;

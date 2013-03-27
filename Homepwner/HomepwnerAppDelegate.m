@@ -36,9 +36,9 @@
 
 - (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
 {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+//    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
         return UIInterfaceOrientationMaskAll;
-    else
+//    else
         return UIInterfaceOrientationMaskPortrait;
 }
 

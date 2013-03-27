@@ -26,6 +26,8 @@ UIAlertView *dateChangeWarning;
 
 UIActionSheet *imageRemoveConfirmSheet;
 
+UITableView *backgroundView;
+
 BOOL startInputOnLoad;
 
 @synthesize item, dismissBlock;
@@ -140,7 +142,7 @@ BOOL startInputOnLoad;
     // Load instance variable values
     [nameField setText:[item itemName]];
     [serialNumberField setText:[item serialNumber]];
-    [valueField setText:[NSString stringWithFormat:@"%d",[item valueInDollars]]];
+    [valueField setText:[NSString stringWithFormat:@"%@",[item valueInDollars] ? [NSNumber numberWithInt:[item valueInDollars]] : @""]];
     [self updateDateLabel];
     [datePickerView setDate:[NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]] animated:NO];
     [self updateAssetTypeButtonLabel];
@@ -188,10 +190,10 @@ BOOL startInputOnLoad;
     {
         // Apparently groupTableViewBackgroundColor is deprecated; use an actual UITableView to get this look.
         [[self view] setBackgroundColor:[UIColor clearColor]];
-        UITableView *tv = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
-        [tv setUserInteractionEnabled:NO]; // don't let the TableView catch touches - it has no delegate!
-        [[self view] addSubview:tv];
-        [[self view] sendSubviewToBack:tv];
+        backgroundView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        [backgroundView setUserInteractionEnabled:NO]; // don't let the TableView catch touches - it has no delegate!
+        [[self view] addSubview:backgroundView];
+        [[self view] sendSubviewToBack:backgroundView];
     }
     
     [nameField setDelegate:self];
@@ -223,15 +225,28 @@ BOOL startInputOnLoad;
     {
         [valueField becomeFirstResponder];
     }
+    else if (textField == valueField)
+    {
+        [valueField resignFirstResponder];
+    }
     
     return NO;
+}
+
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    [backgroundView setNeedsUpdateConstraints];
 }
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
 {
     if (textField == valueField) {
-        if ([item valueInDollars] == 0) {
-            [valueField setText:@""];
+        if ([[valueField text] isEqualToString:@"0"]){
+            [valueField setClearsOnBeginEditing:YES];
+        }
+        else {
+            [valueField setClearsOnBeginEditing:NO];
         }
     }
     return YES;

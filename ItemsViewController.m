@@ -59,6 +59,7 @@
     
     DetailViewController *detailViewController = [[DetailViewController alloc] initForNewItem:YES];
     [detailViewController setItem:newItem];
+    [detailViewController setTitle:@"New Item"];
     [detailViewController setDismissBlock:^{
         [[self tableView] reloadData];
     }];
