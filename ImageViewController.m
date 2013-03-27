@@ -54,43 +54,16 @@
     
     [scrollView addSubview:imageView];
 
-    // Trying to find the white background that peeked through earlier…
-//    UIColor *newcolor = [UIColor colorWithRed:0 green:1.0 blue:0.0 alpha:0.5];
-//    [[[[[self navigationController] viewControllers] lastObject] view] setBackgroundColor:newcolor];
-//    [[[[[self navigationController] viewControllers] lastObject] view] setOpaque:NO];
-//    [[[self presentingViewController] view] setBackgroundColor:[UIColor redColor]];
-//    [[[self parentViewController] view] setBackgroundColor:[UIColor blueColor]];
-    
     if ([self navigationController]) {
         if ([[[[self navigationController] viewControllers] lastObject] view]) {
             [[[[[self navigationController] viewControllers] lastObject] view] setBackgroundColor:[UIColor blackColor]];
         }
     }
-    
-    // Nav Button for debugging
-    [[self navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(logSnapshot:)]];
-}
-
-- (void)logSnapshot:(id)sender
-{
-    NSLog(@"----------BUTTON START----------");
-    NSLog(@"Views:\r%@\r%@", imageView, scrollView);
-    LOGRECT([scrollView bounds], @"ScrollView Bounds");
-    LOGINSET([scrollView contentInset]);
-    LOGPOINT([scrollView contentOffset], @"Offset");
-    LOGSIZE([scrollView contentSize], @"Content Size");
-    NSLog(@"Current Zoom: %.2f", [scrollView zoomScale]);
-    NSLog(@"Calculated Minimum Zoom: %.2f", [scrollView minimumZoomScale]);
-    NSLog(@"Actual Minimum Zoom: %2f", [scrollView minimumZoomScale]);
-    NSLog(@"-----------BUTTON END-----------");
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-//    NSLog(@"ViewWillAppear");
-    // GOLD CHALLENGE: Enable Zooming
-    
     // Zoom out and center the image
     [scrollView setMaximumZoomScale:5.0];
     [scrollView setMinimumZoomScale:[self minimumZoomForScrollView:scrollView]];
@@ -143,53 +116,13 @@
     if (sv == scrollView) {
         [scrollView setContentInset:[self insetsToCenterContentInScrollView:sv]];
     }
-//    NSLog(@"\r\rDidZoom");
-//    [self logContents];
-}
-
-- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView
-                       withView:(UIView *)view
-                        atScale:(float)scale
-{
-    NSLog(@"\r\rDidEndZooming With Scale: %.2f", scale);
-}
-
-- (void)logContents
-{
-    NSLog(@"Current Zoom: %2f", [scrollView zoomScale]);
-    NSLog(@"Minimum Zoom: %2f", [scrollView minimumZoomScale]);
-    NSLog(@"Content Scale Factor: %.2f", [scrollView contentScaleFactor]);
-    LOGSIZE([scrollView bounds].size, @"ScrollView Bounds");
-    LOGSIZE([scrollView contentSize], @"Content Size");
-    LOGSIZE([imageView frame].size, @"ImageView Frame");
-    LOGSIZE([imageView bounds].size, @"ImageView Bounds");
-}
-
-- (void)viewWillLayoutSubviews
-{
-    NSLog(@"\r\rWillLayoutSubviews");
-    [self logContents];
-    return;
 }
 
 - (void)viewDidLayoutSubviews
 {
-    NSLog(@"\r\rDidLayoutSubviews");
     [super viewDidLayoutSubviews];
-    
-//    [self logContents];
     [self updateMinimumZoomForScrollView:scrollView animated:YES];
     [scrollView setContentInset:[self insetsToCenterContentInScrollView:scrollView]];
-    
-//    [scrollView setMinimumZoomScale:[self minimumZoomForScrollView:scrollView]];
-//    [scrollView setContentInset:[self insetsToCenterContentInScrollView:scrollView]];
-//    if ([scrollView zoomScale] <= [scrollView minimumZoomScale]) {
-//        [scrollView setZoomScale:[scrollView minimumZoomScale] animated:YES];
-//    }
-//
-//    NSLog(@"----Did:\r%@\r\r%@", scrollView, imageView);
-//    NSLog(@"---------LAYOUT END------------");
-//    [self logSnapshot:nil];
 }
 
 @end
