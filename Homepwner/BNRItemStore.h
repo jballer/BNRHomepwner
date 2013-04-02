@@ -30,6 +30,7 @@
 - (NSArray *)allAssetTypes;
 
 // Returns the index of the new AssetType object
+// If it can't be added, returns NSUIntegerMax
 - (int)addAssetType:(NSString *)label;
 
 // Removes the AssetType

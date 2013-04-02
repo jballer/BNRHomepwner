@@ -123,23 +123,29 @@
 
 - (int)addAssetType:(NSString *)label
 {
+    // Added code to prevent duplicates…
+    
     int index = NSUIntegerMax;
+    
+    BOOL alreadyPresent = FALSE;
     for (NSManagedObject *assetType in allAssetTypes) {
-        if ([[assetType valueForKey:@"label"] lowercaseString] == [label lowercaseString]){
-            NSLog(@"There's already an asset type by that name");
-            return false;
+        if ([[assetType valueForKey:@"label"] caseInsensitiveCompare:label] == NSOrderedSame){
+            NSLog(@"There's already an asset type by that name!");
+            alreadyPresent = TRUE;
         }
     }
-    NSManagedObject *assetType;
-    
-    assetType = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
-                                              inManagedObjectContext:context];
-    
-    [assetType setValue:label forKey:@"label"];
-    [self loadAllAssetTypes]; // refresh the cached array
+    if (!alreadyPresent)
+    {
+        NSManagedObject *assetType;
+        
+        assetType = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
+                                                  inManagedObjectContext:context];
+        
+        [assetType setValue:label forKey:@"label"];
+        [self loadAllAssetTypes]; // refresh the cached array
 
-    index = [allAssetTypes indexOfObject:assetType];
-    
+        index = [allAssetTypes indexOfObject:assetType];
+    }
     return index;
 }
 

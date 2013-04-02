@@ -13,6 +13,8 @@
 
 @implementation AssetTypePicker
 
+UITableViewCell *currentSelection;
+
 @synthesize item, popoverController;
 @synthesize insertingNewAssetType = _insertingNewAssetType;
 
@@ -66,6 +68,59 @@
                                                 inSection:0];
 }
 
+#pragma mark -
+#pragma mark <UITextFieldDelegate>
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    return [self insertingNewAssetType];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [self setInsertingNewAssetType:NO]; // This "deletes" the input cell
+    
+    [[self tableView] beginUpdates];
+    
+    if ([[textField text] isEqualToString:@""]) {
+        // "delete" the row if there was no entry
+        [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
+                                withRowAnimation:UITableViewRowAnimationAutomatic];
+    }
+    else
+    {
+        // If there's a new type added, get rid of the TextField and move the cell into place
+        
+        int newIndex = [[BNRItemStore sharedStore] addAssetType:[textField text]];
+        
+        if (newIndex != NSUIntegerMax)
+        {
+            NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:0]-1 inSection:0];
+            UITableViewCell *inputCell = [self.tableView cellForRowAtIndexPath:oldIndexPath];
+            NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:newIndex inSection:0];
+            
+            // Set the text label and clear the text field
+            inputCell.textLabel.text = textField.text;
+            [textField removeFromSuperview];
+
+            // Move the new cell to its rightful place
+            [[self tableView] moveRowAtIndexPath:oldIndexPath toIndexPath:newIndexPath];
+            
+        }
+        else
+        {   // Otherwise, delete the row
+            [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
+                                    withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+    }
+    
+    [[self tableView] endUpdates];
+    
+    [textField resignFirstResponder];
+    
+    return NO;
+}
+
 - (NSString *)tableView:(UITableView *)tableView
 titleForHeaderInSection:(NSInteger)section
 {
@@ -79,59 +134,10 @@ titleForHeaderInSection:(NSInteger)section
     return title;
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
-{
-//    if (textField == assetTypeInputField) {
-
-        [self setInsertingNewAssetType:NO]; // This "deletes" the input cell
-        
-        if ([[textField text] isEqualToString:@""]) {
-            // "delete" the row if there was no entry
-            [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
-                                    withRowAnimation:UITableViewRowAnimationAutomatic];
-        }
-        else
-        {
-            // Replace all of the cell in place if there's a new type
-            
-            int newIndex = [[BNRItemStore sharedStore] addAssetType:[textField text]];
-            
-            if (newIndex != NSUIntegerMax)
-            {
-                NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:newIndex inSection:0];
-                NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0];
-
-                [[self tableView] moveRowAtIndexPath:oldIndexPath toIndexPath:newIndexPath];
-                
-                double delayInSeconds = 1.0;
-                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-                    [[self tableView] reloadRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
-                });
-                
-//                [[self tableView] reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationAutomatic];
-    //            [[self tableView] reloadRowsAtIndexPaths:[NSArray arrayWithObject:
-    //              [NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
-    //                                    withRowAnimation:UITableViewRowAnimationFade];
-            }
-            else
-            {   // Otherwise, delete the row
-                [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
-                                        withRowAnimation:UITableViewRowAnimationAutomatic];
-            }
-        }
-
-        [textField resignFirstResponder];
-//        assetTypeInputField = nil;
-        return NO;
-//    }
-//    return YES;
-}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     NSInteger numberOfSections = 1;
-    if ([item assetType]) {
+    if ([item assetType] && [self tableView:tableView numberOfRowsInSection:1]) {
         numberOfSections = 2;
     }
     return numberOfSections;
@@ -203,6 +209,7 @@ titleForHeaderInSection:(NSInteger)section
             // Put a checkmark next to the one that's selected
             if (assetType == [item assetType]) {
                 [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
+                currentSelection = cell;
             }
             else {
                 [cell setAccessoryType:UITableViewCellAccessoryNone];
@@ -219,22 +226,22 @@ titleForHeaderInSection:(NSInteger)section
         
         NSArray *array = [[[item assetType] valueForKey:@"items"] sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
         
+
         BNRItem *currentItem = [array objectAtIndex:[indexPath row]];
         
-        [[cell textLabel] setText:[currentItem itemName]];
-        [[cell detailTextLabel] setText:[currentItem serialNumber]];
+        [[cell nameLabel] setText:[currentItem itemName]];
+        [[cell serialNumberLabel] setText:[currentItem serialNumber]];
         [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
         
         [[cell thumbnailView] setImage:[currentItem thumbnail]];
+
+        // BRONZE CHALLENGE
+        [[cell valueLabel] setTextColor:([item valueInDollars] > 50) ? [UIColor greenColor] : [UIColor redColor]];
         
         // Tell the cell about the controller and view so it can act on them
         [cell setController:self];
         [cell setTableView:tableView];
-        
-        // BRONZE CHALLENGE
-        [[cell valueLabel] setTextColor: ([currentItem valueInDollars] > 50) ?
-         [UIColor greenColor] : [UIColor redColor]];
-        
+
         return cell;
     }
     else
@@ -256,11 +263,6 @@ titleForHeaderInSection:(NSInteger)section
             // Don't allow editing for the input row
             return UITableViewCellEditingStyleNone;
         }
-//        else if ([item assetType] == [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]])
-//        {
-//            // Don't allow editing for the selected row, this screws up the second section
-//            return UITableViewCellEditingStyleNone;
-//        }
         else
         {
             return UITableViewCellEditingStyleDelete;
@@ -274,7 +276,7 @@ titleForHeaderInSection:(NSInteger)section
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
  forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([indexPath section] == 0 && ![self insertingNewAssetType]) {
+    if ([indexPath section] == 0 && !_insertingNewAssetType) {
         if (editingStyle == UITableViewCellEditingStyleDelete) {
             
             [[self tableView] beginUpdates];
@@ -312,24 +314,56 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 -       (void)tableView:(UITableView *)tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // Desired behavior:
+    // If current selection, uncheck, set assettype to nil, remove second section
+    // If new selection, change the type, update the second section
+    
     if ([indexPath section] == 0) {
-        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-        
-        [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
-        
         NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
         
-        [item setAssetType:assetType];
+        [[self tableView] beginUpdates];
         
-        if (popoverController) {
-            [popoverController dismissPopoverAnimated:YES];
+        // If this was a new selection
+        if ([item assetType] != assetType) {
+            [item setAssetType:assetType];
+            
+            // Make sure there's only one checkmark
+            NSArray *indexPaths = [NSArray arrayWithObjects:indexPath, [tableView indexPathForCell:currentSelection], nil];
+            [[self tableView] reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
+            currentSelection = [tableView cellForRowAtIndexPath:indexPath];
+            
+            // Update the lower section list
+            if ([self tableView:tableView numberOfRowsInSection:1]) {
+                if ([[self tableView] numberOfSections] == 1)
+                    [[self tableView] insertSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationRight];
+                else
+                    [[self tableView] reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationLeft];
+            }
         }
-        else {
-            [[self navigationController] popViewControllerAnimated:YES];
+        else // make the asset type "nil"
+        {
+            // Clear the checkmark
+            [item setAssetType:nil];
+            currentSelection = nil;
+            [[self tableView] reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            
+            // Clear the second section, if necessary
+            if ([[self tableView] numberOfSections] != 1) {
+                [[self tableView] deleteSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationLeft];
+            }
         }
-    }
-    else
+
         [tableView deselectRowAtIndexPath:indexPath animated:NO];
+        [[self tableView] endUpdates];
+        
+// This is the code to dismiss the picker on selection
+//        if (popoverController) {
+//            [popoverController dismissPopoverAnimated:YES];
+//        }
+//        else {
+//            [[self navigationController] popViewControllerAnimated:YES];
+//        }
+    }
 }
 
 @end
