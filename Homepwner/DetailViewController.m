@@ -25,12 +25,15 @@ UIDatePicker *datePickerView;
 UIAlertView *dateChangeWarning;
 
 UIActionSheet *imageRemoveConfirmSheet;
+UIActionSheet *cancelConfirmSheet;
 
 UITableView *backgroundView;
 
 BOOL startInputOnLoad;
 
 @synthesize item, dismissBlock;
+
+#pragma mark Initialization
 
 - (id)initForNewItem:(BOOL)isNew
 {
@@ -67,69 +70,11 @@ BOOL startInputOnLoad;
     return nil;
 }
 
-- (void)save:(id)sender
-{
-    [[self presentingViewController] dismissViewControllerAnimated:YES
-                                                        completion:dismissBlock];
-}
-
-- (void)cancel:(id)sender
-{
-    // If user canceled, remove the BNRItem from the store
-    [[BNRItemStore sharedStore] removeItem:item];
-    
-    [[self presentingViewController] dismissViewControllerAnimated:YES
-                                                        completion:dismissBlock];
-}
-
-- (void)setUpDateChanger
-{
-    dateChanger = [[UITextView alloc] init];
-    datePickerView = [[UIDatePicker alloc] init];
-    [datePickerView setDatePickerMode:UIDatePickerModeDateAndTime];
-    [dateChanger setInputView:datePickerView];
-    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 0, 30)];
-    [toolbar setBarStyle:UIBarStyleBlackOpaque];
-    [toolbar setItems:[NSArray arrayWithObjects:
-                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
-                                                                     target:dateChanger
-                                                                     action:@selector(resignFirstResponder)],
-                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
-                                                                     target:self
-                                                                     action:@selector(saveNewDate)],
-                       nil]];
-    [dateChanger setInputAccessoryView:toolbar];
-}
-
-- (NSUInteger)supportedInterfaceOrientations
-{
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
-        return UIInterfaceOrientationMaskAll;
-    else
-        return UIInterfaceOrientationMaskPortrait;
-}
-
-- (void)setItem:(BNRItem *)i
-{
-    item = i;
-    [[self navigationItem] setTitle:[i itemName]];
-}
-
-- (void)updateDateLabel
-{
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateStyle:NSDateFormatterShortStyle];
-    [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
-
-    [dateLabel setText:[dateFormatter stringFromDate:
-                        [NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]]]];
-}
-
+#pragma mark UIView and Lifecycle
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
     // Clear the first responder
     [[self view] endEditing:YES];
     
@@ -153,17 +98,6 @@ BOOL startInputOnLoad;
     [self updateImage];
 }
 
-- (void)updateImage
-{
-    // Get the image ID
-    if ([item imageKey]){
-        [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
-    }
-    else {
-        [imageView setImage:nil];
-    }
-}
-
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
@@ -178,19 +112,20 @@ BOOL startInputOnLoad;
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
- 
+    
     // Set background to TableView look
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-            [[self view] setBackgroundColor:[UIColor colorWithRed:0.875
-                                                            green:0.88
-                                                             blue:0.91
-                                                            alpha:1]];
+        [[self view] setBackgroundColor:[UIColor colorWithRed:0.875
+                                                        green:0.88
+                                                         blue:0.91
+                                                        alpha:1]];
     }
     else
     {
         // Apparently groupTableViewBackgroundColor is deprecated; use an actual UITableView to get this look.
         [[self view] setBackgroundColor:[UIColor clearColor]];
         backgroundView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+        [backgroundView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
         [backgroundView setUserInteractionEnabled:NO]; // don't let the TableView catch touches - it has no delegate!
         [[self view] addSubview:backgroundView];
         [[self view] sendSubviewToBack:backgroundView];
@@ -198,7 +133,7 @@ BOOL startInputOnLoad;
     
     [nameField setDelegate:self];
     [serialNumberField setDelegate:self];
-
+    
     //SILVER CHALLENGE: find a way to dismiss the number keyboard
     UIToolbar *accessoryToolbar = [[UIToolbar alloc]
                                    initWithFrame:CGRectMake(0, 0, 0, 30)];
@@ -212,82 +147,39 @@ BOOL startInputOnLoad;
     [valueField setInputAccessoryView:accessoryToolbar];
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    // Dismiss keyboard when the view is tapped
+    [[self view] endEditing:YES];
+    [super touchesEnded:touches withEvent:event];
+}
+
+#pragma mark Buttons
+
+- (IBAction)showAssetTypePicker:(id)sender
 {
-    // SILVER CHALLENGE+: went ahead and set return to dismiss the other keyboards
-    [textField resignFirstResponder];
-    
-    if (textField == nameField)
+    if ([assetTypePickerPopover isPopoverVisible])
     {
-        [serialNumberField becomeFirstResponder];
-    }
-    else if (textField == serialNumberField)
-    {
-        [valueField becomeFirstResponder];
-    }
-    else if (textField == valueField)
-    {
-        [valueField resignFirstResponder];
+        [assetTypePickerPopover dismissPopoverAnimated:YES];
+        assetTypePickerPopover = nil;
+        return;
     }
     
-    return NO;
-}
-
-- (void)viewDidLayoutSubviews
-{
-    [super viewDidLayoutSubviews];
-    [backgroundView setNeedsUpdateConstraints];
-}
-
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
-{
-    if (textField == valueField) {
-        if ([[valueField text] isEqualToString:@"0"]){
-            [valueField setClearsOnBeginEditing:YES];
-        }
-        else {
-            [valueField setClearsOnBeginEditing:NO];
-        }
-    }
-    return YES;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField
-{
+    [[self view] endEditing:YES];
     
-}
-
-- (void)changeDate:(id)sender
-{
-    dateChangeWarning = [[UIAlertView alloc] initWithTitle:@"Be Cool." message:@"Don't commit insurance fraud!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Continue", nil];
-    [dateChangeWarning show];
-}
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if (alertView == dateChangeWarning) {
-        switch (buttonIndex) {
-            case 1:
-                [self changeDateContinuePastWarning];
-                break;
-                
-            default:
-                break;
-        }
-        dateChangeWarning = nil;
+    AssetTypePicker *picker = [[AssetTypePicker alloc] init];
+    [picker setItem:item];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        // Popover
+        assetTypePickerPopover = [[UIPopoverController alloc] initWithContentViewController:picker];
+        [picker setPopoverController:assetTypePickerPopover];
+        
+        [assetTypePickerPopover presentPopoverFromRect:[sender frame] inView:[self view] permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     }
-}
-
-- (void)changeDateContinuePastWarning
-{
-    [dateChanger becomeFirstResponder];
-}
-
-- (void)saveNewDate
-{
-    [item setDateCreated:[[datePickerView date] timeIntervalSinceReferenceDate]];
-    [self updateDateLabel];
-    [dateChanger resignFirstResponder];
+    else // Modal view controller
+    {
+        [[self navigationController] pushViewController:picker animated:YES];
+    }
 }
 
 - (IBAction)takePicture:(id)sender
@@ -323,7 +215,7 @@ BOOL startInputOnLoad;
     [imagePicker setDelegate:self];
     
     // BRONZE CHALLENGE: enable editing
-//    [imagePicker setAllowsEditing:YES];
+    //    [imagePicker setAllowsEditing:YES];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         imagePickerPopover = [[UIPopoverController alloc] initWithContentViewController:imagePicker];
@@ -338,33 +230,6 @@ BOOL startInputOnLoad;
     }
 }
 
-- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
-{
-//    NSLog(@"User dismissed popover %@", popoverController);
-    if (popoverController == imagePickerPopover){
-        imagePickerPopover = nil;
-        NSLog(@"got here (image)");
-    }
-    if (popoverController == assetTypePickerPopover) {
-        assetTypePickerPopover = nil;
-        [self updateAssetTypeButtonLabel];
-        NSLog(@"got here (asset)");
-    }
-}
-
-- (void) updateAssetTypeButtonLabel
-{
-    NSString *label = [[item assetType] valueForKey:@"label"];
-    [assetTypeButton setTitle:[NSString stringWithFormat:@"%@", label ? label : @"Set Asset Type"]
-                     forState:UIControlStateNormal];
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    // Dismiss keyboard when the view is tapped
-    [[self view] endEditing:YES];
-    [super touchesEnded:touches withEvent:event];
-}
-
 - (IBAction)removePicture:(id)sender
 {
     if ([item imageKey] == nil) {
@@ -372,38 +237,11 @@ BOOL startInputOnLoad;
     }
     
     imageRemoveConfirmSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                            delegate:self
-                                                   cancelButtonTitle:@"Cancel"
-                                              destructiveButtonTitle:@"Remove Image"
-                                                   otherButtonTitles:nil];
+                                                          delegate:self
+                                                 cancelButtonTitle:@"Cancel"
+                                            destructiveButtonTitle:@"Remove Image"
+                                                 otherButtonTitles:nil];
     [imageRemoveConfirmSheet showInView:[self view]];
-}
-
-- (IBAction)showAssetTypePicker:(id)sender
-{
-    if ([assetTypePickerPopover isPopoverVisible])
-    {
-        [assetTypePickerPopover dismissPopoverAnimated:YES];
-        assetTypePickerPopover = nil;
-        return;
-    }
-
-    [[self view] endEditing:YES];
-    
-    AssetTypePicker *picker = [[AssetTypePicker alloc] init];
-    [picker setItem:item];
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        // Popover
-        assetTypePickerPopover = [[UIPopoverController alloc] initWithContentViewController:picker];
-        [picker setPopoverController:assetTypePickerPopover];
-        
-        [assetTypePickerPopover presentPopoverFromRect:[sender frame] inView:[self view] permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-    }
-    else // Modal view controller
-    {
-        [[self navigationController] pushViewController:picker animated:YES];
-    }
 }
 
 - (void)removePictureAfterUserConfirmed
@@ -419,6 +257,179 @@ BOOL startInputOnLoad;
     [[BNRImageStore sharedStore] deleteImageForKey:keyToRemove];
 }
 
+- (void)changeDate:(id)sender
+{
+    dateChangeWarning = [[UIAlertView alloc] initWithTitle:@"Be Cool." message:@"Don't commit insurance fraud!" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Continue", nil];
+    [dateChangeWarning show];
+}
+
+- (void)changeDateContinuePastWarning
+{
+    [dateChanger becomeFirstResponder];
+}
+
+- (void)saveNewDate
+{
+    [item setDateCreated:[[datePickerView date] timeIntervalSinceReferenceDate]];
+    [self updateDateLabel];
+    [dateChanger resignFirstResponder];
+}
+
+#pragma mark Helper Methods
+
+- (void)setItem:(BNRItem *)i
+{
+    item = i;
+    [[self navigationItem] setTitle:[i itemName]];
+}
+
+- (void)setUpDateChanger
+{
+    dateChanger = [[UITextView alloc] init];
+    datePickerView = [[UIDatePicker alloc] init];
+    [datePickerView setDatePickerMode:UIDatePickerModeDateAndTime];
+    [dateChanger setInputView:datePickerView];
+    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 0, 30)];
+    [toolbar setBarStyle:UIBarStyleBlackOpaque];
+    [toolbar setItems:[NSArray arrayWithObjects:
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
+                                                                     target:dateChanger
+                                                                     action:@selector(resignFirstResponder)],
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+                       [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave
+                                                                     target:self
+                                                                     action:@selector(saveNewDate)],
+                       nil]];
+    [dateChanger setInputAccessoryView:toolbar];
+}
+
+- (void)updateDateLabel
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateStyle:NSDateFormatterShortStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    
+    [dateLabel setText:[dateFormatter stringFromDate:
+                        [NSDate dateWithTimeIntervalSinceReferenceDate:[item dateCreated]]]];
+}
+
+- (void) updateAssetTypeButtonLabel
+{
+    NSString *label = [[item assetType] valueForKey:@"label"];
+    [assetTypeButton setTitle:[NSString stringWithFormat:@"%@", label ? label : @"Set Asset Type"]
+                     forState:UIControlStateNormal];
+}
+
+- (void)updateImage
+{
+    // Get the image ID
+    if ([item imageKey]){
+        [imageView setImage:[[BNRImageStore sharedStore] imageForKey:[item imageKey]]];
+    }
+    else {
+        [imageView setImage:nil];
+    }
+}
+
+- (void)save:(id)sender
+{
+    [[self presentingViewController] dismissViewControllerAnimated:YES
+                                                        completion:dismissBlock];
+}
+
+#pragma mark Cancel Entry
+
+- (void)cancel:(id)sender
+{
+    cancelConfirmSheet = [[UIActionSheet alloc] initWithTitle:@"You'll lose this item if you cancel." delegate:self cancelButtonTitle:@"Keep Editing" destructiveButtonTitle:@"Delete Item" otherButtonTitles:nil];
+    [cancelConfirmSheet showInView:[self view]];
+}
+
+- (void)cancelPostConfirm
+{
+    // If user canceled, remove the BNRItem from the store
+    [[BNRItemStore sharedStore] removeItem:item];
+    
+    [[self presentingViewController] dismissViewControllerAnimated:YES
+                                                        completion:dismissBlock];
+}
+
+#pragma mark -
+#pragma mark <UITextFieldDelegate>
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    // SILVER CHALLENGE+: went ahead and set return to dismiss the other keyboards
+    [textField resignFirstResponder];
+    
+    if (textField == nameField)
+    {
+        [serialNumberField becomeFirstResponder];
+    }
+    else if (textField == serialNumberField)
+    {
+        [valueField becomeFirstResponder];
+    }
+    else if (textField == valueField)
+    {
+        [valueField resignFirstResponder];
+    }
+    
+    return NO;
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    if (textField == valueField) {
+        if ([[valueField text] isEqualToString:@"0"]){
+            [valueField setClearsOnBeginEditing:YES];
+        }
+        else {
+            [valueField setClearsOnBeginEditing:NO];
+        }
+    }
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    
+}
+
+#pragma mark <UIAlertViewDelegate>
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView == dateChangeWarning) {
+        switch (buttonIndex) {
+            case 1:
+                [self changeDateContinuePastWarning];
+                break;
+                
+            default:
+                break;
+        }
+        dateChangeWarning = nil;
+    }
+}
+
+#pragma mark <UIPopoverControllerDelegate>
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
+{
+//    NSLog(@"User dismissed popover %@", popoverController);
+    if (popoverController == imagePickerPopover){
+        imagePickerPopover = nil;
+        NSLog(@"got here (image)");
+    }
+    if (popoverController == assetTypePickerPopover) {
+        assetTypePickerPopover = nil;
+        [self updateAssetTypeButtonLabel];
+        NSLog(@"got here (asset)");
+    }
+}
+
+#pragma mark <UIActionSheetDelegate>
+
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (actionSheet == imageRemoveConfirmSheet)
@@ -426,7 +437,14 @@ BOOL startInputOnLoad;
         if (buttonIndex == [actionSheet destructiveButtonIndex])
             [self removePictureAfterUserConfirmed];
     }
+    if (actionSheet == cancelConfirmSheet)
+    {
+        if (buttonIndex == [actionSheet destructiveButtonIndex])
+            [self cancelPostConfirm];
+    }
 }
+
+#pragma mark <UIImagePickerControllerDelegate>
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
@@ -481,12 +499,6 @@ BOOL startInputOnLoad;
 {
     // Dismiss the image picker if it's canceled
     [picker dismissViewControllerAnimated:YES completion:nil];
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 @end

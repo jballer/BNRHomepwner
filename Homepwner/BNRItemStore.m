@@ -12,6 +12,8 @@
 
 @implementation BNRItemStore
 
+#pragma mark Initialization
+
 + (BNRItemStore *)sharedStore
 {
     static BNRItemStore *sharedStore = nil;
@@ -81,6 +83,24 @@
     
     return [documentDirectory stringByAppendingPathComponent:@"store.data"];
 }
+
+#pragma mark AppDelegate Interface
+
+- (BOOL)saveChanges // Called by app delegate when app goes into background
+{
+    //    return [NSKeyedArchiver archiveRootObject:allItems
+    //                                       toFile:[self itemArchivePath]];
+    
+    NSError *err = nil;
+    BOOL successful = [context save:&err];
+    
+    if (!successful) {
+        NSLog(@"Error saving: %@", [err localizedDescription]);
+    }
+    return successful;
+}
+
+#pragma mark AssetTypes
 
 - (NSArray *)allAssetTypes
 {
@@ -154,6 +174,8 @@
     [context deleteObject:assetType];
     [self loadAllAssetTypes]; // refresh the cached array
 }
+
+#pragma mark Items
 
 - (void)loadAllItems
 {
@@ -259,20 +281,6 @@
     
     NSLog(@"moving to order %f", newOrderValue);
     [item setOrderingValue:newOrderValue];
-}
-
-- (BOOL)saveChanges // Called by app delegate when app goes into background
-{
-//    return [NSKeyedArchiver archiveRootObject:allItems
-//                                       toFile:[self itemArchivePath]];
-    
-    NSError *err = nil;
-    BOOL successful = [context save:&err];
-    
-    if (!successful) {
-        NSLog(@"Error saving: %@", [err localizedDescription]);
-    }
-    return successful;
 }
 
 @end

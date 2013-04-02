@@ -45,6 +45,9 @@ UITableViewCell *currentSelection;
            forCellReuseIdentifier:@"HomepwnerItemCell"];
 }
 
+#pragma mark -
+#pragma mark Compose New AssetTypes
+
 - (void)setInsertingNewAssetType:(BOOL)insertingNewAssetType
 {
     _insertingNewAssetType = insertingNewAssetType;
@@ -120,6 +123,8 @@ UITableViewCell *currentSelection;
     
     return NO;
 }
+
+#pragma mark <UITableViewDataSource>
 
 - (NSString *)tableView:(UITableView *)tableView
 titleForHeaderInSection:(NSInteger)section
@@ -248,30 +253,6 @@ titleForHeaderInSection:(NSInteger)section
         return nil;
 }
 
-- (UITableViewCellEditingStyle) tableView:(UITableView *)tableView
-            editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
-    NSLog(@"Items for Asset Type %@:\r%@", [assetType valueForKey:@"label"], [assetType valueForKey:@"items"]);
-    if ([self insertingNewAssetType]) {
-        // Don't allow delete while editing
-        return UITableViewCellEditingStyleNone;
-    }
-    if (([indexPath section] == 0)) {
-        if ([self insertingNewAssetType])
-        {
-            // Don't allow editing for the input row
-            return UITableViewCellEditingStyleNone;
-        }
-        else
-        {
-            return UITableViewCellEditingStyleDelete;
-        }
-    }
-    else
-        return UITableViewCellEditingStyleNone;
-}
-
 - (void) tableView:(UITableView *)tableView
 commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
  forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -280,7 +261,7 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
         if (editingStyle == UITableViewCellEditingStyleDelete) {
             
             [[self tableView] beginUpdates];
-
+            
             // If this was the selected type, ditch the second section
             if ([item assetType] == [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]]) {
                 [[self tableView] deleteSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationRight];
@@ -305,23 +286,16 @@ commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
     }
 }
 
-- (CGSize)contentSizeForViewInPopover
-{
-    CGFloat height = 44 * ([[[BNRItemStore sharedStore] allAssetTypes] count] + 1);
-    return CGSizeMake(320, MIN(height, 720));
-}
-
 -       (void)tableView:(UITableView *)tableView
 didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Desired behavior:
     // If current selection, uncheck, set assettype to nil, remove second section
     // If new selection, change the type, update the second section
-    
+
+    [[self tableView] beginUpdates];
     if ([indexPath section] == 0) {
         NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
-        
-        [[self tableView] beginUpdates];
         
         // If this was a new selection
         if ([item assetType] != assetType) {
@@ -352,18 +326,60 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
                 [[self tableView] deleteSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationLeft];
             }
         }
-
-        [tableView deselectRowAtIndexPath:indexPath animated:NO];
-        [[self tableView] endUpdates];
-        
-// This is the code to dismiss the picker on selection
-//        if (popoverController) {
-//            [popoverController dismissPopoverAnimated:YES];
-//        }
-//        else {
-//            [[self navigationController] popViewControllerAnimated:YES];
-//        }
     }
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    [[self tableView] endUpdates];
+    
+// This is the code to dismiss the picker on selection
+//    if (popoverController) {
+//        [popoverController dismissPopoverAnimated:YES];
+//    }
+//    else {
+//        [[self navigationController] popViewControllerAnimated:YES];
+//    }
 }
+
+#pragma mark <UITableViewDelegate>
+
+- (UITableViewCellEditingStyle) tableView:(UITableView *)tableView
+            editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSManagedObject *assetType = [[[BNRItemStore sharedStore] allAssetTypes] objectAtIndex:[indexPath row]];
+    NSLog(@"Items for Asset Type %@:\r%@", [assetType valueForKey:@"label"], [assetType valueForKey:@"items"]);
+    if ([self insertingNewAssetType]) {
+        // Don't allow delete while editing
+        return UITableViewCellEditingStyleNone;
+    }
+    if (([indexPath section] == 0)) {
+        if ([self insertingNewAssetType])
+        {
+            // Don't allow editing for the input row
+            return UITableViewCellEditingStyleNone;
+        }
+        else
+        {
+            return UITableViewCellEditingStyleDelete;
+        }
+    }
+    else
+        return UITableViewCellEditingStyleNone;
+}
+
+- (CGSize)contentSizeForViewInPopover
+{
+    int count = 0;
+    for (int i=0; i<[self numberOfSectionsInTableView:self.tableView]; i++) {
+        count++; // header
+        for (int j=0; j<[self tableView:self.tableView numberOfRowsInSection:i]; j++) {
+            count++; // cell
+        }
+    }
+    
+    CGFloat height = 44 * count;
+    
+    return CGSizeMake(320, MIN(height, 720));
+}
+
+
 
 @end
