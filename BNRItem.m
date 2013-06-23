@@ -25,15 +25,18 @@
 {
     [super awakeFromFetch];
     
-    [self setPrimitiveValue:[UIImage imageWithData:[self thumbnailData]]
-                     forKey:@"thumbnail"];
+	UIImage *tn = [UIImage imageWithData:[self thumbnailData]];
+	
+    [self setPrimitiveValue:tn forKey:@"thumbnail"];
 }
 
 - (void)awakeFromInsert
 {
     [super awakeFromInsert];
     
-    [self setDateCreated:[[NSDate date] timeIntervalSinceReferenceDate]];
+	NSTimeInterval t = [[NSDate date] timeIntervalSinceReferenceDate];
+	
+    [self setDateCreated:t];
 }
 
 - (void)setThumbnailDataFromImage:(UIImage *)image
@@ -76,9 +79,11 @@
     
     // Keep it as our thumbnail
     [self setThumbnail:smallImage];
+	
+	NSData *data = UIImagePNGRepresentation(smallImage);
     
     // Get the PNG representation and set it as archivable data
-    [self setThumbnailData:UIImagePNGRepresentation(smallImage)];
+    [self setThumbnailData:data];
     
     // Clear the image context
     UIGraphicsEndImageContext();

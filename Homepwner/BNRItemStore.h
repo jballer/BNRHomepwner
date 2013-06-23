@@ -18,7 +18,7 @@
 // Chapter 16 - CoreData
     // allAssetTypes is sorted by name (case-insensitive)
     // It initializes an empty set with 3 default types.
-    NSArray *allAssetTypes;
+    NSMutableArray *allAssetTypes;
     NSManagedObjectContext *context;
     NSManagedObjectModel *model;
 }

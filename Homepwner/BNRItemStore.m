@@ -105,14 +105,41 @@
 - (NSArray *)allAssetTypes
 {
     if (!allAssetTypes) {
-        [self loadAllAssetTypes];
+//		NSFetchRequest *request = [[NSFetchRequest alloc] init];
+//		
+//		NSEntityDescription *e = [[model entitiesByName] objectForKey:@"BNRAssetType"];
+//		
+//		[request setEntity:e];
+//		
+//		NSError *error;
+//		NSArray *result = [context executeFetchRequest:request error:&error];
+//		if (!result) {
+//			[NSException raise:@"Fetch failed" format:@"Reason: %@", [error localizedDescription]];
+//		}
+//		
+//        allAssetTypes = [result mutableCopy];
+		
+		[self loadAllAssetTypes];
     }
     
     // First run? Set up the array with some defaults
     if ([allAssetTypes count] == 0) {
-        [self addAssetType:@"Furniture"];
-        [self addAssetType:@"Jewelry"];
-        [self addAssetType:@"Electronics"];
+		
+		NSManagedObject *type;
+		
+		type = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
+											 inManagedObjectContext:context];
+		[type setValue:@"Furniture" forKey:@"label"];
+		
+		type = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
+											 inManagedObjectContext:context];
+		[type setValue:@"Jewelry" forKey:@"label"];
+		
+		type = [NSEntityDescription insertNewObjectForEntityForName:@"BNRAssetType"
+											 inManagedObjectContext:context];
+		[type setValue:@"Electronics" forKey:@"label"];
+		
+		[self loadAllAssetTypes];
     }
     
     return allAssetTypes;
@@ -123,8 +150,15 @@
     NSFetchRequest *request = [[NSFetchRequest alloc] init];
     
     NSEntityDescription *description = [[model entitiesByName] objectForKey:@"BNRAssetType"];
-    
     [request setEntity:description];
+	
+	NSSortDescriptor *sort = [[NSSortDescriptor alloc]
+								 initWithKey:@"label"
+								 ascending:YES
+								 selector:@selector(localizedCaseInsensitiveCompare:)];
+	
+	[request setSortDescriptors:@[sort]];
+	
     
     NSError *err;
     NSArray *result = [context executeFetchRequest:request error:&err];
@@ -132,13 +166,10 @@
     if (!result) {
         [NSException raise:@"Fetch failed" format:@"Reason: %@", [err localizedDescription]];
     }
-    
-    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"label" ascending:YES
-                                                          comparator:^(id obj1, id obj2) {
-                                                              return [(NSString *)obj1 localizedCaseInsensitiveCompare:obj2];
-                                                          }];
-    
-    allAssetTypes = [result sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]];
+        
+//    allAssetTypes = [[result sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
+	
+	allAssetTypes = [result mutableCopy];
 }
 
 - (int)addAssetType:(NSString *)label

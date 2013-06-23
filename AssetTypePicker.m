@@ -87,18 +87,20 @@ UITableViewCell *currentSelection;
     
     if ([[textField text] isEqualToString:@""]) {
         // "delete" the row if there was no entry
-        [[self tableView] deleteRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
+        [[self tableView] deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[[self tableView] numberOfRowsInSection:0]-1 inSection:0]]
                                 withRowAnimation:UITableViewRowAnimationAutomatic];
     }
     else
     {
         // If there's a new type added, get rid of the TextField and move the cell into place
         
+		int oldIndex = [self.tableView numberOfRowsInSection:0]-1;
         int newIndex = [[BNRItemStore sharedStore] addAssetType:[textField text]];
-        
+		
+		
         if (newIndex != NSUIntegerMax)
         {
-            NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:0]-1 inSection:0];
+            NSIndexPath *oldIndexPath = [NSIndexPath indexPathForRow:oldIndex inSection:0];
             UITableViewCell *inputCell = [self.tableView cellForRowAtIndexPath:oldIndexPath];
             NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:newIndex inSection:0];
             
@@ -106,9 +108,15 @@ UITableViewCell *currentSelection;
             inputCell.textLabel.text = textField.text;
             [textField removeFromSuperview];
 
-            // Move the new cell to its rightful place
-            [[self tableView] moveRowAtIndexPath:oldIndexPath toIndexPath:newIndexPath];
-            
+			if(newIndex == oldIndex)
+			{
+				[[self tableView] reloadRowsAtIndexPaths:@[newIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+			}
+			else
+			{
+				// Move the new cell to its rightful place
+				[[self tableView] moveRowAtIndexPath:oldIndexPath toIndexPath:newIndexPath];
+			}
         }
         else
         {   // Otherwise, delete the row
