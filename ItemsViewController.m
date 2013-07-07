@@ -162,7 +162,10 @@
         
         [[cell nameLabel] setText:[currentItem itemName]];
         [[cell serialNumberLabel] setText:[currentItem serialNumber]];
-        [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
+//        [[cell valueLabel] setText:[NSString stringWithFormat:@"$%d", [currentItem valueInDollars]]];
+		NSString *currencySymbol = [[NSLocale currentLocale] objectForKey:NSLocaleCurrencySymbol];
+		cell.valueLabel.text = [NSString stringWithFormat:@"%@%d", currencySymbol, [currentItem valueInDollars]];
+		
         [[cell thumbnailView] setImage:[currentItem thumbnail]];
         
         // BRONZE CHALLENGE
